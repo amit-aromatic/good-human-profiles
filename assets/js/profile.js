@@ -63,8 +63,8 @@ async function getData(profile) {
     document.getElementById('data_endorsements').innerHTML = endorsementsData.join('') || noDataCard;
 }
 const pathname = this.location.pathname.split('/');
-if (pathname.length != 2) {
+if (pathname.length > 2 && pathname[2].length) {
     window.location.href = "/";
 }
-const profile = pathname.pop();
+const profile = pathname[1];
 getData(profile);
