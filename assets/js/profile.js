@@ -1,3 +1,10 @@
+const pathname = this.location.pathname.split('/');
+if (pathname.length > 2 && pathname[2].length) {
+    window.location.href = "/";
+}
+const profile = pathname[1];
+getData(profile);
+
 const noDataCard = `
 <div class="card mb-2" style="width: 100%;">
     <div class="card-body">
@@ -11,43 +18,63 @@ async function getData(profile) {
     const res = await fetch(url);
     if (res.status === 403) window.location.href = "/error.html";
     const data = await res.json();
+    
     // name
-    document.getElementById('data_name').innerHTML = data.name;
+    $('#data_name').html(data.name);
+
     // externalLinks
-    const externalLinks = data.externalLinks|| [];
-    const externalLinksData = externalLinks.filter(item => item.published).map(item => {
-        return `<a target="_blank" href="${item.url}">${item.platform}</a>`;
-    });
-    document.getElementById('data_externalLinks').innerHTML = externalLinksData.join('<br/>');
+    const externalLinks = data.externalLinks || [];
+    if (!externalLinks.length) $("#data_externalLinks").hide();
+    const externalLinksData = externalLinks.filter(item => item.published)
+        .map(item => `<a target="_blank" href="${item.url}">${item.platform}</a>` );
+    $('#data_externalLinks').html(externalLinksData.join('<br/>'));
+
     // skills
     const skills = data.skills|| [];
-    const skillsData = skills.map(item => {
-        return `<li>${item}</li>`;
-    });
-    document.getElementById('data_skills').innerHTML = skillsData.join('');
+    if (!skills.length) $("#skills-wrap").hide();
+    const skillsData = skills.map(item => `<li>${item}</li>`);
+    $('#data_skills').html(skillsData.join(''));
+
     // traits
     const traits = data.traits|| [];
-    const traitsData = traits.map(item => {
-        return `<li>${item}</li>`;
-    });
-    document.getElementById('data_traits').innerHTML = traitsData.join('');
+    if (!traits.length) $("#traits-wrap").hide();
+    const traitsData = traits.map(item => `<li>${item}</li>`);
+    $('#data_traits').html(traitsData.join(''));
+
+    // left-pane
+    if (!skills.length && !traits.length && !externalLinks.length) {
+        $('#left-pane').hide();
+    }
+
+    // story
+    const story = data.story;
+    story ? setStoryData(story) : $('#data_story-tab').hide();
+
     // testimonials
     const testimonials = data.testimonials|| [];
-    const testimonialsData = testimonials.filter(item => item.published).map(item => {
-        return `<div class="card mb-2" style="width: 100%;">
-            <div class="card-body">
-                <p class="card-text">${item.text}</p>
-                <p class="card-link text-end">
-                ${item.author}
-                <br/>
-                <i style="color: gray;">${item.relation}</i>
-                </p>
-            </div>
-        </div>`;
-    });
-    document.getElementById('data_testimonials').innerHTML = testimonialsData.join('') || noDataCard;
+    testimonials.length ? setTestominalsData(testimonials) : $('#data_testimonials-tab').hide();
+    
     // endorsements
     const endorsements = data.endorsements|| [];
+    endorsements.length ? setEndorsementsData(endorsements) : $('#data_endorsements-tab').hide();
+    
+    // right-pane
+    if ($('#pills-tab .nav-link:visible').length) $('#pills-tab .nav-link:visible')[0].click();
+    if (!endorsements.length && !testimonials.length && !story) {
+        $('#right-pane').hide();
+    }
+}
+
+function setStoryData(story) {
+    const storyData = `<div class="card mb-2" style="width: 100%;">
+    <div class="card-body">
+        <p class="card-text">${story.text}</p>
+    </div>
+    </div>`;
+    $('#data_story').html(storyData);
+}
+
+function setEndorsementsData(endorsements) {
     const endorsementsData = endorsements.filter(item => item.published).map(item => {
         return `<div class="card mb-2" style="width: 100%;">
             <div class="card-body">
@@ -60,11 +87,21 @@ async function getData(profile) {
             </div>
         </div>`;
     });
-    document.getElementById('data_endorsements').innerHTML = endorsementsData.join('') || noDataCard;
+    $('#data_endorsements').html(endorsementsData.join('') || noDataCard);
 }
-const pathname = this.location.pathname.split('/');
-if (pathname.length > 2 && pathname[2].length) {
-    window.location.href = "/";
+
+function setTestominalsData(testimonials) {
+    const testimonialsData = testimonials.filter(item => item.published).map(item => {
+        return `<div class="card mb-2" style="width: 100%;">
+            <div class="card-body">
+                <p class="card-text">${item.text}</p>
+                <p class="card-link text-end">
+                ${item.author}
+                <br/>
+                <i style="color: gray;">${item.relation}</i>
+                </p>
+            </div>
+        </div>`;
+    });
+    $('#data_testimonials').html(testimonialsData.join('') || noDataCard);
 }
-const profile = pathname[1];
-getData(profile);
