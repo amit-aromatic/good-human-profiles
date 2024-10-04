@@ -50,7 +50,7 @@ async function setUserName() {
         "method": "GET",
         "timeout": 0,
         "headers": {
-          "Authorization": 'Bearer ' + token
+          "Authorization": 'Bearer ' + token.value
         },
       };
       
