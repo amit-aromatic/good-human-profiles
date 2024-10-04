@@ -55,11 +55,13 @@ async function setUserName() {
       };
       
       $.ajax(getUsername).done(async (response) => {
-        await cookieStore.set({
+        const username = response.filter(v => v.Name==='email')[0].Value;
+        cookieStore.set({
             name: "username",
-            value: response.filter(v => v.Name==='email')[0].Value,
+            value: username,
             expires: Date.now() + (1000*60*60*24),
             domain: "goodhuman.in",
         });
+        showUsername(username);
       });
 }

@@ -1,0 +1,17 @@
+<script>
+$( document ).ready(async function() {
+    await cookieStore.delete({
+        name: "refresh_token",
+        domain: "goodhuman.in",
+    })
+    await cookieStore.delete({
+        name: "access_token",
+        domain: "goodhuman.in",
+    })
+    await cookieStore.delete({
+        name: "username",
+        domain: "goodhuman.in",
+    })
+    window.location.href = "/";
+});
+</script>
