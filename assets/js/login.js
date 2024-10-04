@@ -22,8 +22,8 @@ function login(code) {
         }
     };
     
-    $.ajax(login).done(function (response) {
-        cookieStore.set({
+    $.ajax(login).done(async (response) => {
+        await cookieStore.set({
             name: "access_token",
             value: response.access_token,
             expires: Date.now() + (1000*60*60*24),
@@ -54,8 +54,8 @@ async function setUserName() {
         },
       };
       
-      $.ajax(getUsername).done(function (response) {
-        cookieStore.set({
+      $.ajax(getUsername).done(async (response) => {
+        await cookieStore.set({
             name: "username",
             value: response.filter(v => v.Name==='email')[0].Value,
             expires: Date.now() + (1000*60*60*24),
