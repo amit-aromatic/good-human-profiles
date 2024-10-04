@@ -43,17 +43,18 @@ function login(code) {
 
 }
 
-function setUserName() {
-    var settings = {
+async function setUserName() {
+    const token = await cookieStore.get('access_token');
+    const getUsername = {
         "url": "https://api.goodhuman.in/me",
         "method": "GET",
         "timeout": 0,
         "headers": {
-          "Authorization": 'Bearer ' + cookieStore.get('access_token')
+          "Authorization": 'Bearer ' + token
         },
       };
       
-      $.ajax(settings).done(function (response) {
+      $.ajax(getUsername).done(function (response) {
         cookieStore.set({
             name: "username",
             value: response.filter(v => v.Name==='email')[0].Value,
