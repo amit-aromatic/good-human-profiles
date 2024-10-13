@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-100">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,84 +7,97 @@
     <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   </head>
-  <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary mb-2">
-      <div class="container-fluid">
-        <span class="navbar-brand">The Good Human</span>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/privacy-policy.html">Privacy Policy</a>
-            </li>
-            <li class="nav-item" style="position: absolute; right: 1rem;" id="login-nav">
-              <a id="login-url" class="nav-link" href="">Login</a>
-            </li>
-            <li class="nav-item dropdown" style="display: none;position: absolute; right: 1rem;z-index:1;" id="logout-nav">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                User
-              </a>
-              <ul class="dropdown-menu" style="left:auto; right: 0;">
-                <li><a class="dropdown-item" href="#">My Account</a></li>
-                <!-- <li><hr class="dropdown-divider"></li> -->
-                <li><a id="logout-url" class="dropdown-item" href="">Logout</a></li>
+  <body class="d-flex flex-column h-100">
+    <header>
+      <nav class="navbar navbar-expand-lg bg-body-tertiary mb-2 ">
+        <div class="container-fluid">
+          <span class="navbar-brand">The Good Human</span>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="/">Home</a>
+              </li>
+            </ul>
+            <div class="d-flex" role="search">
+              <ul class="navbar-nav">
+                <li class="nav-item me-2" style="display: auto;" id="login-nav">
+                  <a id="login-url" class="nav-link" href="">Login</a>
+                </li>
+                <li class="nav-item dropdown me-2" style="display: none;" id="logout-nav">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    User
+                  </a>
+                  <ul class="dropdown-menu" style="left:auto; right: 0px;">
+                    <li><a class="dropdown-item" href="/account">My Account</a></li>
+                    <!-- <li><hr class="dropdown-divider"></li> -->
+                    <li><a id="logout-url" class="dropdown-item" href="">Logout</a></li>
+                  </ul>
+                </li>
               </ul>
-            </li>
-          </ul>
+            </div>
+          </div>
         </div>
-      </div>
-    </nav>
-    <div class="container text-left">
-      <div class="row m-2">
-        <div class="col mb-0 alert alert-info">
-          <img src="/logo.PNG" alt="The Good Human" class="d-inline-block" style="height: 32px;" />
-          <span id="data_name"></span>
+      </nav>
+    </header>
+    <main class="flex-shrink-0">
+      <div class="container text-left">
+        <div class="row p-2">
+          <div class="col mb-0 alert alert-info">
+            <img src="/logo.PNG" alt="The Good Human" class="d-inline-block" style="height: 32px;" />
+            <span id="data_name"></span>
+          </div>
         </div>
-      </div>
       
-      <div class="row m-2 ">
+        <div class="row p-2 ">
 
-        <div class="col-sm-4 p-0" id="left-pane">  
-          <div id="data_externalLinks" class="bg-body-tertiary rounded mb-2 p-2"></div>
-          <div class="bg-body-tertiary rounded mb-2 p-2" id="skills-wrap" style="max-height: 20rem; overflow: auto;">
-            <h5>Skills</h5>
-            <ul id="data_skills"></ul>
+          <div class="col-sm-4 p-0" id="left-pane">  
+            <div id="data_externalLinks" class="bg-body-tertiary rounded mb-2 p-2"></div>
+            <div class="bg-body-tertiary rounded mb-2 p-2" id="skills-wrap" style="max-height: 20rem; overflow: auto;">
+              <h5>Skills</h5>
+              <ul id="data_skills"></ul>
+            </div>
+            <div class="bg-body-tertiary rounded mb-2 p-2" id="traits-wrap" style="max-height: 20rem; overflow: auto;">
+              <h5>Traits</h5>
+              <ul id="data_traits"></ul>    
+            </div>
           </div>
-          <div class="bg-body-tertiary rounded mb-2 p-2" id="traits-wrap" style="max-height: 20rem; overflow: auto;">
-            <h5>Traits</h5>
-            <ul id="data_traits"></ul>    
+          
+          <div class="col-sm-8" id="right-pane">
+            <!-- tabs -->
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="data_story-tab" data-bs-toggle="pill" data-bs-target="#data_story" type="button" role="tab" aria-controls="data_story" aria-selected="false">Story</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="data_testimonials-tab" data-bs-toggle="pill" data-bs-target="#data_testimonials" type="button" role="tab" aria-controls="data_testimonials" aria-selected="false">Testimonials</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="data_endorsements-tab" data-bs-toggle="pill" data-bs-target="#data_endorsements" type="button" role="tab" aria-controls="data_endorsements" aria-selected="false">Endorsements</button>
+              </li>
+            </ul>
+            <!-- content -->
+            <div class="tab-content" id="pills-tabContent">
+              <div class="tab-pane fade " id="data_story" role="tabpanel" aria-labelledby="data_story-tab" tabindex="0"></div>
+              <div class="tab-pane fade " id="data_testimonials" role="tabpanel" aria-labelledby="data_testimonials-tab" tabindex="0"></div>
+              <div class="tab-pane fade " id="data_endorsements" role="tabpanel" aria-labelledby="data_endorsements-tab" tabindex="0"></div>
+            </div>
           </div>
-        </div>
-        
-        <div class="col-sm-8" id="right-pane">
-          <!-- tabs -->
-          <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="data_story-tab" data-bs-toggle="pill" data-bs-target="#data_story" type="button" role="tab" aria-controls="data_story" aria-selected="false">Story</button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="data_testimonials-tab" data-bs-toggle="pill" data-bs-target="#data_testimonials" type="button" role="tab" aria-controls="data_testimonials" aria-selected="false">Testimonials</button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="data_endorsements-tab" data-bs-toggle="pill" data-bs-target="#data_endorsements" type="button" role="tab" aria-controls="data_endorsements" aria-selected="false">Endorsements</button>
-            </li>
-          </ul>
-          <!-- content -->
-          <div class="tab-content" id="pills-tabContent">
-            <div class="tab-pane fade " id="data_story" role="tabpanel" aria-labelledby="data_story-tab" tabindex="0"></div>
-            <div class="tab-pane fade " id="data_testimonials" role="tabpanel" aria-labelledby="data_testimonials-tab" tabindex="0"></div>
-            <div class="tab-pane fade " id="data_endorsements" role="tabpanel" aria-labelledby="data_endorsements-tab" tabindex="0"></div>
-          </div>
-        </div>
 
+        </div>
       </div>
-
-    </div>
+    </main>
+    <footer class="footer mt-auto py-3 bg-body-tertiary">
+      <div class="container text-secondary">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link " href="/privacy-policy">Privacy Policy</a>
+          </li>
+        </ul>
+      </div>
+    </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="/assets/js/common.js" type="text/javascript"></script>
