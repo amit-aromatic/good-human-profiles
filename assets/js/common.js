@@ -15,5 +15,4 @@ function setLoginLogoutUrl() {
     const scope = 'api%2Fall+aws.cognito.signin.user.admin+email+openid';
     $('#login-url').prop('href', `${domain}/oauth2/authorize?client_id=${client_id}&response_type=code&scope=${scope}&redirect_uri=https%3A%2F%2Fthe.goodhuman.in%2F`);
     $('#logout-url').prop('href', `${domain}/logout?client_id=${client_id}&response_type=code&scope=${scope}&logout_uri=https%3A%2F%2Fthe.goodhuman.in%2Flogout.html`);
-    $('a:contains("My Account")').prop('href','/account');
 }
