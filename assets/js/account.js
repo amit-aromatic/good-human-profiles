@@ -15,10 +15,9 @@ async function getAccount(token) {
       };
       
       $.ajax(settings).done(function (response) {
-        console.log(response);
         const username = response.filter(v => v.Name==='email')[0].Value;
-        const name = response.filter(v => v.Name==='name')[0].Value;
-        const birthday = response.filter(v => v.Name==='birthday')[0].Value;
+        const name = response.filter(v => v.Name==='name')[0]?.Value;
+        const birthday = response.filter(v => v.Name==='birthday')[0]?.Value;
       });
 
 }
