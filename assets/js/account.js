@@ -1,6 +1,6 @@
 $( document ).ready(async function() {
     const token = typeof cookieStore !== 'undefined' ? await cookieStore.get('access_token') : $.cookie('access_token');
-    if(token) getAccount(token.value);
+    if(token) getAccount(token.value || token);
     else window.location.href = $('#login-url').prop('href');
 });
 
