@@ -1,5 +1,5 @@
 $( document ).ready(async function() {
-    const token = await cookieStore.get('access_token');
+    const token = typeof cookieStore !== 'undefined' ? await cookieStore.get('access_token') : $.cookie('access_token');
     if(token) getAccount(token.value);
     else window.location.href = $('#login-url').prop('href');
 });
@@ -10,7 +10,8 @@ async function getAccount(token) {
         "method": "GET",
         "timeout": 0,
         "headers": {
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          "Access-Control-Allow-Origin": window.location.origin
         },
       };
       
