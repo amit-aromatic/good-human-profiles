@@ -26,6 +26,7 @@ async function getAccount() {
 }
 
 async function putAccount() {
+  $('#saveAccountBtn').prop('disabled', true)
   const settings = {
       "url": "https://api.goodhuman.in/me",
       "method": "PUT",
@@ -38,6 +39,7 @@ async function putAccount() {
     };
     
     $.ajax(settings).done(function (response) {
+      $('#saveAccountBtn').prop('disabled', false)
       console.log({ response })
       getAccount();
     });
