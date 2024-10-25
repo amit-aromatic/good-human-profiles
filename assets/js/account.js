@@ -1,4 +1,5 @@
 const token = $.cookie('access_token');
+$('#account-form').hide();
 
 $( document ).ready(async function() {
     if(token) getAccount();
@@ -22,6 +23,7 @@ async function getAccount() {
         const birthday = response.filter(v => v.Name==='birthday')[0]?.Value;
         $('#inputEmail').val(username);
         $('#inputName').val(name);
+        $('#account-form').show();
       });
 }
 
@@ -39,8 +41,7 @@ async function putAccount() {
     };
     
     $.ajax(settings).done(function (response) {
-      $('#saveAccountBtn').prop('disabled', false)
-      console.log({ response })
+      $('#saveAccountBtn').prop('disabled', false);
       getAccount();
     });
 }
