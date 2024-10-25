@@ -32,13 +32,13 @@ async function getData(profile) {
     // skills
     const skills = data.skills|| [];
     if (!skills.length) $("#skills-wrap").hide();
-    const skillsData = skills.map(item => `<li>${item}</li>`);
+    const skillsData = skills.map(item => `<li>${item.text}</li>`);
     $('#data_skills').html(skillsData.join(''));
 
     // traits
     const traits = data.traits|| [];
     if (!traits.length) $("#traits-wrap").hide();
-    const traitsData = traits.map(item => `<li>${item}</li>`);
+    const traitsData = traits.map(item => `<li>${item.text}</li>`);
     $('#data_traits').html(traitsData.join(''));
 
     // left-pane
