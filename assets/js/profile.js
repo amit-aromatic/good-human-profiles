@@ -29,6 +29,14 @@ async function getData(profile) {
         .map(item => `<a target="_blank" href="${item.url}">${item.platform}</a>` );
     $('#data_externalLinks').html(externalLinksData.join('<br/>'));
 
+    // picture
+    if (data.picture && data.picture.length) {
+        $('#data_picture').html(`<img src="${data.picture}" style="width: 100%;">`);
+    }
+    else {
+        $('#data_picture').hide();
+    }
+    
     // skills
     const skills = data.skills|| [];
     if (!skills.length) $("#skills-wrap").hide();
