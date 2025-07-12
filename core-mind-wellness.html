@@ -168,6 +168,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js" integrity="sha512-3j3VU6WC5rPQB4Ld1jnLV7Kd5xr+cq9avvhwqzbH/taCRNURoeEpoPBK9pDyeukwSxwRPJ8fDgvYXd6SkaZ2TA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="/assets/js/common.js" type="text/javascript"></script>
     <script src="/assets/js/profile.js" type="text/javascript"></script>
+    <script defer src="https://vuxo.aiempower.ca/chatbot.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof PanoramaChatbot === 'undefined') {
+            console.error('PanoramaChatbot is not defined. Ensure the script is loaded from https://vuxo.aiempower.ca/panorama-chatbot.js');
+            return;
+        }
+        PanoramaChatbot.init({
+            botId: '240ba3c2-3de2-47df-81aa-72237f06e1ea',
+            bgColor: '#ffffff',
+            width: '400px',
+            height: '600px',
+            position: 'bottom-right',
+            isAlways: true,
+            iconUrl: 'https://storage.googleapis.com/aiempower-public-media/Avatar/Panorama.jpeg'
+        });
+    });
+    </script>
       
 
 <div id="quick-start-container"></div></body></html>
