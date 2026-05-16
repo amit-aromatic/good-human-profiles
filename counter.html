@@ -64,7 +64,15 @@
           <div id="counter" class="col-12 col-md-6 p-4 bg-opacity-90 rounded-4 border border-secondary">
             <div class="mb-3">
               <label for="naamInput" class="form-label ">Naam being recited</label>
-              <input type="text" value="Radha" class="form-control bg-black text-light border-secondary" id="naamInput" placeholder="Enter naam or mantra" style="font-size: 1.1rem;">
+              <input type="text" value="Radha" class="form-control bg-black text-light border-secondary" id="naamInput" list="naamSuggestions" placeholder="Enter naam or mantra" style="font-size: 1.1rem;">
+              <datalist id="naamSuggestions">
+                <option value="Radha"></option>
+                <option value="Raam"></option>
+                <option value="Saamb sadashiv"></option>
+                <option value="ॐ कृष्णाय वासुदेवाय हरये परमात्मने। प्रणतः क्लेशनाशाय गोविन्दाय नमो नमः॥"></option>
+                <option value="हरे कृष्ण हरे कृष्ण कृष्ण कृष्ण हरे हरे। हरे राम हरे राम राम राम हरे हरे॥"></option>
+              </datalist>
+              <div class="form-text text-secondary mt-2">Suggestions: Radha · Raam · Saamb sadashiv · ॐ कृष्णाय वासुदेवाय हरये परमात्मने। प्रणतः क्लेशनाशाय गोविन्दाय नमो नमः॥ · हरे कृष्ण हरे कृष्ण कृष्ण कृष्ण हरे हरे। हरे राम हरे राम राम राम हरे हरे॥</div>
             </div>
             <div class="mb-3">
               <label class="form-label">Theme</label>
