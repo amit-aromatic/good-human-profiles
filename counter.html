@@ -64,7 +64,7 @@
           <div id="counter" class="col-12 col-md-6 p-4 bg-opacity-90 rounded-4 border border-secondary">
             <div class="mb-3">
               <label for="naamInput" class="form-label ">Naam being recited</label>
-              <input type="text" value="Radha Radha" class="form-control bg-black text-light border-secondary" id="naamInput" placeholder="Enter naam or mantra" style="font-size: 1.1rem;">
+              <input type="text" value="Radha" class="form-control bg-black text-light border-secondary" id="naamInput" placeholder="Enter naam or mantra" style="font-size: 1.1rem;">
             </div>
             <div class="mb-3">
               <label class="form-label">Theme</label>
@@ -92,6 +92,15 @@
               </div>
               <div class="col-6">
                 <button type="button" class="btn btn-light border-secondary w-100" id="incrementBtn">+1</button>
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-12">
+                <button type="button" class="btn border-secondary w-100" id="speechBtn">
+                  <span id="speechBtnIcon" aria-hidden="true">🔊</span>
+                  <span id="speechBtnLabel">Start Speech</span>
+                </button>
+                <div id="speechVoiceStatus" class="form-text text-warning mt-2">Loading Hindi voice…</div>
               </div>
             </div>
 
