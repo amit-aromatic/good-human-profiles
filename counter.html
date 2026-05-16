@@ -67,14 +67,14 @@
               <input type="text" value="Radha Radha" class="form-control bg-black text-light border-secondary" id="naamInput" placeholder="Enter naam or mantra" style="font-size: 1.1rem;">
             </div>
             <div class="mb-3">
-              <label for="themeSelect" class="form-label ">Theme</label>
-              <select id="themeSelect" class="form-select border-secondary" style="font-size: 1rem;">
-                <option value="default">Night</option>
-                <option value="day">Day</option>
-                <option value="yellowish">Yellowish</option>
-                <option value="bluish">Bluish</option>
-                <option value="greenish">Greenish</option>
-              </select>
+              <label class="form-label">Theme</label>
+              <div id="themeButtons" class="btn-group d-flex flex-nowrap gap-1" role="group" aria-label="Theme selection">
+                <button type="button" class="btn btn-outline-light btn-sm flex-fill active" data-theme="default" style="min-width:0; padding:.35rem .55rem;">Night</button>
+                <button type="button" class="btn btn-outline-light btn-sm flex-fill" data-theme="day" style="min-width:0; padding:.35rem .55rem;">Day</button>
+                <button type="button" class="btn btn-outline-light btn-sm flex-fill" data-theme="yellowish" style="min-width:0; padding:.35rem .55rem;">Yellow</button>
+                <button type="button" class="btn btn-outline-light btn-sm flex-fill" data-theme="bluish" style="min-width:0; padding:.35rem .55rem;">Blue</button>
+                <button type="button" class="btn btn-outline-light btn-sm flex-fill" data-theme="greenish" style="min-width:0; padding:.35rem .55rem;">Green</button>
+              </div>
             </div>
             <p class=" mb-4">Track your recitation. 1 maala = 108 repetitions.</p>
 

@@ -29,12 +29,17 @@ $(document).ready(async function() {
     updateDisplay();
   });
 
-  const themeSelect = document.getElementById('themeSelect');
-  if (themeSelect) {
-    themeSelect.addEventListener('change', function() {
-      applyTheme(this.value);
+  const themeButtons = document.querySelectorAll('#themeButtons button[data-theme]');
+  if (themeButtons.length) {
+    themeButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        applyTheme(this.dataset.theme || 'default');
+        setActiveThemeButton(this);
+      });
     });
-    applyTheme(themeSelect.value || 'default');
+    const defaultTheme = 'default';
+    applyTheme(defaultTheme);
+    setActiveThemeButton(document.querySelector(`#themeButtons button[data-theme="${defaultTheme}"]`));
   }
 
   if (token || true) getCounter();
@@ -53,11 +58,16 @@ function applyTheme(name) {
     counterCard.style.color = theme.text;
   }
 
-  const themeSelect = document.getElementById('themeSelect');
-  if (themeSelect) {
-    themeSelect.style.backgroundColor = theme.selectBg;
-    themeSelect.style.color = theme.selectText;
-  }
+  const themeButtons = document.querySelectorAll('#themeButtons button[data-theme]');
+  themeButtons.forEach(button => {
+    if (name === 'day') {
+      button.classList.remove('btn-outline-light');
+      button.classList.add('btn-outline-dark');
+    } else {
+      button.classList.remove('btn-outline-dark');
+      button.classList.add('btn-outline-light');
+    }
+  });
 
   // Ensure buttons contrast properly on 'day' theme (light card)
   const dayChecks = ['resetBtn', 'naamInput', 'increment', 'incrementStep'];
@@ -86,6 +96,14 @@ function applyTheme(name) {
   });
 
   
+}
+
+function setActiveThemeButton(activeButton) {
+  const buttons = document.querySelectorAll('#themeButtons button[data-theme]');
+  buttons.forEach(button => {
+    button.classList.toggle('active', button === activeButton);
+    button.setAttribute('aria-pressed', button === activeButton ? 'true' : 'false');
+  });
 }
 
 function changeCount(delta) {
