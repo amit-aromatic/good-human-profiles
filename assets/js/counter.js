@@ -1,6 +1,12 @@
 const token = $.cookie('access_token');
 const MAALA_SIZE = 108;
 let totalCount = 0;
+const themes = {
+  default: { body: '#0f1724', card: 'rgba(15, 23, 36, 0.9)', text: '#f8fafc', selectBg: '#0f1724', selectText: '#f8fafc' },
+  yellowish: { body: 'rgba(255, 255, 0, 0.5)', card: '#8b4513', text: '#f8f1c2', selectBg: '#1c1a08', selectText: '#f8f1c2' },
+  bluish: { body: 'rgb(187, 211, 239)', card: 'rgba(4, 32, 68, 0.9)', text: '#d6e8ff', selectBg: '#081a2f', selectText: '#d6e8ff' },
+  greenish: { body: 'rgb(188, 243, 214)', card: '#198754', text: '#d8f6e2', selectBg: '#061b10', selectText: '#d8f6e2' },
+};
 
 $('#counter-form').hide();
 
@@ -22,9 +28,33 @@ $(document).ready(async function() {
     updateDisplay();
   });
 
+  const themeSelect = document.getElementById('themeSelect');
+  if (themeSelect) {
+    themeSelect.addEventListener('change', function() {
+      applyTheme(this.value);
+    });
+    applyTheme(themeSelect.value || 'default');
+  }
+
   if (token || true) getCounter();
   else window.location.href = $('#login-url').prop('href');
 });
+
+function applyTheme(name) {
+  const theme = themes[name] || themes.default;
+  document.body.style.backgroundColor = theme.body;
+  document.body.style.color = theme.text;
+  const counterCard = document.getElementById('counter');
+  if (counterCard) {
+    counterCard.style.backgroundColor = theme.card;
+    counterCard.style.borderColor = theme.selectText;
+  }
+  const themeSelect = document.getElementById('themeSelect');
+  if (themeSelect) {
+    themeSelect.style.backgroundColor = theme.selectBg;
+    themeSelect.style.color = theme.selectText;
+  }
+}
 
 function changeCount(delta) {
   totalCount = Math.max(0, totalCount + delta);

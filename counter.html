@@ -61,18 +61,27 @@
     <main class="flex-shrink-0">
       <div class="container text-left">
         <div class="row p-2 justify-content-center">
-          <div class="col-12 col-md-6 p-4 bg-dark bg-opacity-90 rounded-4 border border-secondary">
+          <div id="counter" class="col-12 col-md-6 p-4 bg-opacity-90 rounded-4 border border-secondary">
             <div class="mb-3">
-              <label for="naamInput" class="form-label text-light">Naam being recited</label>
-              <input type="text" class="form-control bg-dark text-light border-secondary" id="naamInput" placeholder="Enter naam or mantra" style="font-size: 1.1rem;">
+              <label for="naamInput" class="form-label text-light-na">Naam being recited</label>
+              <input type="text" value="Radha Radha" class="form-control bg-black text-light border-secondary" id="naamInput" placeholder="Enter naam or mantra" style="font-size: 1.1rem;">
             </div>
-            <p class="text-light mb-4">Track your recitation. 1 maala = 108 repetitions.</p>
+            <div class="mb-3">
+              <label for="themeSelect" class="form-label text-light-na">Theme</label>
+              <select id="themeSelect" class="form-select bg-black text-light-na border-secondary" style="font-size: 1rem;">
+                <option value="default">Night</option>
+                <option value="yellowish">Yellowish</option>
+                <option value="bluish">Bluish</option>
+                <option value="greenish">Greenish</option>
+              </select>
+            </div>
+            <p class="text-light-na mb-4">Track your recitation. 1 maala = 108 repetitions.</p>
 
             <div class="mb-3">
-              <label for="increment" class="form-label text-light">Current Count</label>
+              <label for="increment" class="form-label text-light-na">Current Count</label>
               <div class="input-group input-group-lg">
-                <input type="number" class="form-control bg-dark text-light border-secondary" id="increment" value="0" style="font-size: 2rem; text-align: center;">
-                <span class="input-group-text bg-dark text-light border-secondary">/ 108</span>
+                <input type="number" class="form-control bg-black text-light border-secondary" id="increment" value="0" style="font-size: 2rem; text-align: center;">
+                <span class="input-group-text bg-black text-light border-secondary">/ 108</span>
               </div>
             </div>
 
@@ -85,7 +94,7 @@
               </div>
             </div>
 
-            <div class="d-flex justify-content-between text-light small">
+            <div class="d-flex justify-content-between text-light-na small">
               <div>Completed maala: <span id="completedMaala">0</span></div>
               <div>Remaining: <span id="remainingCount">108</span></div>
             </div>
