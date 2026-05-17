@@ -4,6 +4,10 @@ let totalCount = 0;
 let speechLoopActive = false;
 let hindiVoice = null;
 let hindiVoiceLoadStart = null;
+let backgroundAudioContext = null;
+let backgroundMusicGain = null;
+let backgroundMusicOscillators = [];
+let backgroundMusicPulseInterval = null;
 const themes = {
   default: { body: '#0f1724', card: 'rgba(15, 23, 36, 0.9)', text: '#f8fafc', selectBg: '#0f1724', selectText: '#f8fafc' },
   day: { body: '#f2f7fb', card: 'rgba(255,255,255,0.95)', text: '#0f1724', selectBg: '#f2f7fb', selectText: '#0f1724' },
@@ -17,12 +21,14 @@ $('#counter-form').hide();
 $(document).ready(async function() {
   document.getElementById('incrementBtn').addEventListener('click', function() {
     changeCount(1);
+    // startBackgroundMusic();
   });
 
   document.getElementById('resetBtn').addEventListener('click', function() {
     totalCount = 0;
     updateDisplay();
     stopSpeechLoop();
+    // stopBackgroundMusic();
   });
 
   document.getElementById('speechBtn').addEventListener('click', function() {
@@ -179,6 +185,7 @@ function startSpeechLoop() {
     updateSpeechButtonLabel(true);
     updateSpeechButtonTheme(getCurrentTheme());
   }
+  startBackgroundMusic();
   speakNaam();
 }
 
@@ -186,6 +193,7 @@ function stopSpeechLoop() {
   const speechBtn = document.getElementById('speechBtn');
   speechLoopActive = false;
   speechSynthesis.cancel();
+  stopBackgroundMusic();
   if (speechBtn) {
     updateSpeechButtonLabel(false);
     updateSpeechButtonTheme(getCurrentTheme());
@@ -220,6 +228,80 @@ function getCurrentTheme() {
   return (activeButton && activeButton.dataset.theme) || 'default';
 }
 
+function ensureBackgroundMusic() {
+  if (!window.AudioContext && !window.webkitAudioContext) {
+    console.warn('Web Audio API not supported in this browser');
+    return;
+  }
+  if (backgroundAudioContext) {
+    return;
+  }
+
+  backgroundAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+  backgroundMusicGain = backgroundAudioContext.createGain();
+  backgroundMusicGain.gain.value = 0;
+  backgroundMusicGain.connect(backgroundAudioContext.destination);
+
+  const osc = backgroundAudioContext.createOscillator();
+  osc.type = 'triangle';
+  osc.frequency.value = 196;
+  osc.connect(backgroundMusicGain);
+  osc.start();
+  backgroundMusicOscillators = [osc];
+}
+
+function scheduleTannPulse(startTime) {
+  const envelope = backgroundMusicGain.gain;
+  const peak = 2.6 + Math.random() * 0.8;
+  const decay = 1 + Math.random() * 0.5;
+  envelope.cancelScheduledValues(startTime);
+  envelope.setValueAtTime(0, startTime);
+  envelope.linearRampToValueAtTime(peak, startTime + 0.01);
+  envelope.exponentialRampToValueAtTime(0.02, startTime + 0.12);
+  envelope.setTargetAtTime(0, startTime + 0.18, decay);
+}
+
+function playTannSequence() {
+  if (!backgroundAudioContext || !backgroundMusicGain) {
+    return;
+  }
+  const now = backgroundAudioContext.currentTime;
+  scheduleTannPulse(now + 0.1);
+  scheduleTannPulse(now + 0.35);
+  scheduleTannPulse(now + 0.5);
+  scheduleTannPulse(now + 0.65);
+  scheduleTannPulse(now + 0.9);
+}
+
+function startBackgroundMusic() {
+  ensureBackgroundMusic();
+  if (!backgroundAudioContext || !backgroundMusicGain) {
+    return;
+  }
+
+  if (backgroundAudioContext.state === 'suspended') {
+    backgroundAudioContext.resume();
+  }
+
+  playTannSequence();
+  if (backgroundMusicPulseInterval) {
+    clearInterval(backgroundMusicPulseInterval);
+  }
+  backgroundMusicPulseInterval = setInterval(playTannSequence, 1800);
+}
+
+function stopBackgroundMusic() {
+  if (backgroundMusicPulseInterval) {
+    clearInterval(backgroundMusicPulseInterval);
+    backgroundMusicPulseInterval = null;
+  }
+  if (!backgroundAudioContext || !backgroundMusicGain) {
+    return;
+  }
+  backgroundMusicGain.gain.cancelScheduledValues(backgroundAudioContext.currentTime);
+  backgroundMusicGain.gain.setTargetAtTime(0, backgroundAudioContext.currentTime, 0.2);
+}
+
 function speakNaam() {
   if (!speechLoopActive) {
     return;
@@ -238,9 +320,9 @@ function speakNaam() {
   } else {
     utterance.lang = 'hi-IN';
   }
-  utterance.rate = 0.95;
-  utterance.pitch = 1;
-  utterance.volume = 1;
+  utterance.rate = 0.8;
+  utterance.pitch = 0.6;
+  utterance.volume = 0.8;
 
   utterance.onend = function() {
     if (!speechLoopActive) {
