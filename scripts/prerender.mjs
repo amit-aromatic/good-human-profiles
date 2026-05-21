@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
 
@@ -49,6 +49,11 @@ async function main() {
       await writeFile(outputPath, html, 'utf8');
       console.log(`Wrote ${outputPath}`);
     }
+
+    const indexPath = path.join(OUTPUT_DIR, 'index.html');
+    const notFoundPath = path.join(OUTPUT_DIR, '404.html');
+    await copyFile(indexPath, notFoundPath);
+    console.log(`Copied ${indexPath} to ${notFoundPath}`);
   } finally {
     await browser.close();
   }
