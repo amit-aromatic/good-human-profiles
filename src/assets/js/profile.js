@@ -1,14 +1,14 @@
-const staticPages = [
+const staticPages = new Set([
     '/', '/account', '/counter', '/error/not-found', '/privacy-policy', '/logout'
-];
+]);
 
-const pathnameStr = window.location.pathname;
+const pathnameStr = globalThis.location.pathname;
 const pathname = pathnameStr.split('/');
-if (!staticPages.includes(pathnameStr) && pathname.length > 2 && pathname[2].length) {
-    window.location.href = "/error/not-found";
+if (!staticPages.has(pathnameStr) && pathname.length > 2 && pathname[2].length) {
+    globalThis.location.href = "/error/not-found";
 }
 const profile = pathname[1];
-getData(profile);
+await getData(profile);
 
 const noDataCard = `
 <div class="card mb-2" style="width: 100%;">
@@ -19,9 +19,10 @@ const noDataCard = `
 `;
 async function getData(profile) {
 
+    if (staticPages.has(pathnameStr)) return;
     const url = `https://the-good-human.s3.ap-south-1.amazonaws.com/profiles/${profile}.json`;
     const res = await fetch(url);
-    if (!staticPages.includes(pathnameStr) && res.status === 403) window.location.href = "/error/not-found";
+    if (res.status === 403) globalThis.location.href = "/error/not-found";
     const data = await res.json();
     
     // name
@@ -35,7 +36,7 @@ async function getData(profile) {
     $('#data_externalLinks').html(externalLinksData.join('<br/>'));
 
     // picture
-    if (data.picture && data.picture.length) {
+    if (data.picture?.length) {
         $('#data_picture').html(`<img src="${data.picture}" style="width: 100%;">`);
     }
     else {

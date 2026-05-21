@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { SEO } from '../assets/js/constants.js';
 
 export default function AccountPage() {
@@ -10,6 +11,59 @@ export default function AccountPage() {
   if (metaKeywords) {
     metaKeywords.setAttribute('content', SEO.default.keywords);
   }
+
+  const secureUrls = new Set(['account']);
+  const [token, setToken] = useState(null);
+
+  const getAccount = async () => {
+      const settings = {
+          "url": "https://api.goodhuman.in/me",
+          "method": "GET",
+          "timeout": 0,
+          "headers": {
+            "Authorization": `Bearer ${token}`,
+            "Access-Control-Allow-Origin": globalThis.location.origin
+          },
+        };
+        
+        $.ajax(settings).done(function (response) {
+          const username = response.find(v => v.Name==='email').Value;
+          const name = response.find(v => v.Name==='name')?.Value;
+          $('#inputEmail').val(username);
+          $('#inputName').val(name);
+          $('#account-form').show();
+        });
+  };
+
+  const putAccount = async () => {
+    $('#saveAccountBtn').prop('disabled', true)
+    const settings = {
+        "url": "https://api.goodhuman.in/me",
+        "method": "PUT",
+        "timeout": 0,
+        "headers": {
+          "Authorization": `Bearer ${token}`,
+          "Access-Control-Allow-Origin": globalThis.location.origin
+        },
+        "data": JSON.stringify({ name: $('#inputName').val() })
+      };
+      
+      $.ajax(settings).done(function (response) {
+        $('#saveAccountBtn').prop('disabled', false);
+        getAccount();
+      });
+  };
+
+  useEffect(() => {
+    const access_token = $.cookie('access_token');
+    setToken(access_token)
+    $('#account-form').hide();
+    const pathname = globalThis.location.pathname.split('/');
+    const path = pathname[1];
+    if (!secureUrls.has(path)) return;
+    if(access_token) getAccount();
+    else globalThis.location.href = $('#login-url').prop('href');
+  }, []);
 
   return (
     <div className="container text-left">
@@ -25,7 +79,7 @@ export default function AccountPage() {
               <input type="text" className="form-control" id="inputName" placeholder="John Doe" />
             </div>
             <div className="col-12">
-              <button type="button" onClick="putAccount()" id="saveAccountBtn" className="btn btn-primary">Save</button>
+              <button type="button" onClick={putAccount} id="saveAccountBtn" className="btn btn-primary">Save</button>
             </div>
           </form>
         </div>
