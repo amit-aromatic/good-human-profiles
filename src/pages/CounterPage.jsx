@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SEO } from '../assets/js/constants.js';
 
 const resetBtnClick = function() {
@@ -17,18 +17,26 @@ export default function CounterPage() {
   }
 
   const MAALA_SIZE = 108;
-  
+  const speechSynthesisRef = globalThis.speechSynthesis;
+
   const [totalCount, setTotalCount] = useState(0);
   const [completedMaala, setCompletedMaala] = useState(0);
-  const [currentCycle, setCurrentCycle] = useState(-1);
+  const [currentCycle, setCurrentCycle] = useState(0);
   const [remaining, setRemaining] = useState(MAALA_SIZE);
   const [speechLoopActive, setSpeechLoopActive] = useState(false);
+  const [hindiVoiceStatus, setHindiVoiceStatus] = useState('Loading Hindi voice…');
+  const [hindiVoiceStatusClass, setHindiVoiceStatusClass] = useState('text-warning');
 
-  let hindiVoice = null;
-  let hindiVoiceLoadStart = null;
-  let backgroundAudioContext = null;
-  let backgroundMusicGain = null;
-  let backgroundMusicPulseInterval = null;
+  const hindiVoiceRef = useRef(null);
+  const hindiVoiceLoadStartRef = useRef(null);
+  const backgroundAudioContextRef = useRef(null);
+  const backgroundMusicGainRef = useRef(null);
+  const speechLoopActiveRef = useRef(false);
+  const backgroundMusicPulseIntervalRef = useRef(null);
+  const speechTimeoutRef = useRef(null);
+  const voiceStatusHideTimeoutRef = useRef(null);
+  const themeButtonsRef = useRef([]);
+
   const themes = {
     default: { body: '#0f1724', card: 'rgba(15, 23, 36, 0.9)', text: '#f8fafc', selectBg: '#0f1724', selectText: '#f8fafc' },
     day: { body: '#f2f7fb', card: 'rgba(255,255,255,0.95)', text: '#0f1724', selectBg: '#f2f7fb', selectText: '#0f1724' },
@@ -41,42 +49,29 @@ export default function CounterPage() {
     changeCount(1);
   }
 
-  useEffect(() => {
-    if (speechLoopActive) {
-      startSpeechLoop();
-    } else {
-      stopSpeechLoop();
-    }
-  }, [speechLoopActive]);
-
-  const incrementOnInput = function(ele) {
-    const cycleValue = Math.max(0, Math.min(Number(ele.value) || 0, MAALA_SIZE));
-    setTotalCount(completedMaala * MAALA_SIZE + cycleValue);
-    updateDisplay();
-  }
-
   function doPageLoadTasks() {
-
     const themeButtons = document.querySelectorAll('#themeButtons button[data-theme]');
+    themeButtonsRef.current = Array.from(themeButtons);
     if (themeButtons.length) {
       themeButtons.forEach(button => {
         button?.addEventListener('click', function() {
-          applyTheme(this.dataset.theme || 'default');
-          setActiveThemeButton(this);
+          applyTheme(button.dataset.theme || 'default');
+          setActiveThemeButton(button);
         });
       });
       const defaultTheme = 'default';
       applyTheme(defaultTheme);
       setActiveThemeButton(document.querySelector(`#themeButtons button[data-theme="${defaultTheme}"]`));
     }
-
   }
 
   function applyTheme(name) {
     const theme = themes[name] || themes.default;
     const bodyElem = document.getElementById('counterBody')
-    bodyElem.style.backgroundColor = theme.body;
-    bodyElem.style.color = theme.text;
+    if (bodyElem) {
+      bodyElem.style.backgroundColor = theme.body;
+      bodyElem.style.color = theme.text;
+    }
 
     const counterCard = document.getElementById('counter');
     if (counterCard) {
@@ -91,32 +86,29 @@ export default function CounterPage() {
       button.classList.add(name === 'day' ? 'btn-outline-dark' : 'btn-outline-light');
     });
 
-    // Ensure buttons contrast properly on 'day' theme (light card)
     const dayChecks = ['resetBtn', 'naamInput', 'increment', 'incrementStep', 'speechBtn'];
 
     dayChecks.forEach(id => {
       const elem = document.getElementById(id);
-      if (name === 'day') {
-        if (elem) {
+      
+      if (elem) {
+        if (name === 'day') {
           elem.style.backgroundColor = 'transparent';
           elem.style.color = theme.text;
           elem.style.borderColor = theme.text;
           elem.classList.remove('bg-black', 'text-light');
         }
-        
-      } else {
-        // clear inline styles so bootstrap classes control appearance
-        if (elem) {
+        else {
           elem.style.backgroundColor = '';
           elem.style.color = '';
           elem.style.borderColor = '';
           elem.classList.add('bg-black', 'text-light');
         }
       }
+      
     });
 
     updateSpeechButtonTheme(name);
-
   }
 
   function setActiveThemeButton(activeButton) {
@@ -129,30 +121,28 @@ export default function CounterPage() {
 
   function changeCount(delta) {
     let tmpTotalCount = Math.max(0, totalCount + delta);
-    setTotalCount(tmpTotalCount)
-    updateDisplay();
+    setTotalCount(tmpTotalCount);
   }
 
   function updateSpeechVoiceStatus(message, classes = 'text-warning') {
-    const status = document.getElementById('speechVoiceStatus');
-    if (!status) return;
-    status.textContent = message;
-    status.classList.remove('text-warning', 'text-success', 'text-danger');
-    status.classList.add(classes);
+    setHindiVoiceStatus(message);
+    setHindiVoiceStatusClass(classes);
   }
 
   function startHindiVoiceLoad() {
-    hindiVoiceLoadStart = performance.now();
+    hindiVoiceLoadStartRef.current = performance.now();
     updateSpeechVoiceStatus('Loading Hindi voice…', 'text-warning');
   }
 
   function finishHindiVoiceLoad(found) {
-    const elapsed = Math.round(performance.now() - (hindiVoiceLoadStart || performance.now()));
+    const elapsed = Math.round(performance.now() - (hindiVoiceLoadStartRef.current || performance.now()));
     if (found) {
       updateSpeechVoiceStatus(`Hindi voice loaded in ${elapsed} ms`, 'text-success');
-      setTimeout(() => {
-        const status = document.getElementById('speechVoiceStatus');
-        if (status) status.style.display = 'none';
+      if (voiceStatusHideTimeoutRef.current) {
+        clearTimeout(voiceStatusHideTimeoutRef.current);
+      }
+      voiceStatusHideTimeoutRef.current = setTimeout(() => {
+        setHindiVoiceStatus('');
       }, 3000);
     } else {
       updateSpeechVoiceStatus('Hindi voice not available', 'text-danger');
@@ -160,25 +150,19 @@ export default function CounterPage() {
   }
 
   function loadHindiVoice() {
-    const voices = speechSynthesis.getVoices() || [];
+    const voices = speechSynthesisRef?.getVoices?.() || [];
     if (!voices.length) {
       return;
     }
 
-    hindiVoice = voices.find(voice => {
+    hindiVoiceRef.current = voices.find(voice => {
       const lang = (voice.lang || '').toLowerCase();
       const name = (voice.name || '').toLowerCase();
       return /^(hi(-|_)?in?|hindi)/.test(lang) || /hindi/.test(name);
     }) || null;
 
-    finishHindiVoiceLoad(Boolean(hindiVoice));
+    finishHindiVoiceLoad(Boolean(hindiVoiceRef.current));
   }
-
-  if ('onvoiceschanged' in speechSynthesis) {
-    speechSynthesis.onvoiceschanged = loadHindiVoice;
-  }
-  startHindiVoiceLoad();
-  loadHindiVoice();
 
   function startSpeechLoop() {
     startBackgroundMusic();
@@ -191,7 +175,11 @@ export default function CounterPage() {
     stopBackgroundMusic();
     updateSpeechButtonLabel(false);
     updateSpeechButtonTheme(getCurrentTheme());
-    speechSynthesis.cancel();
+    speechSynthesisRef?.cancel?.();
+    if (speechTimeoutRef.current) {
+      clearTimeout(speechTimeoutRef.current);
+      speechTimeoutRef.current = null;
+    }
   }
 
   function updateSpeechButtonLabel(isSpeaking) {
@@ -208,7 +196,7 @@ export default function CounterPage() {
     if (!speechBtn) return;
 
     speechBtn.classList.remove('btn-success', 'btn-danger', 'btn-outline-dark');
-    if (speechLoopActive) {
+    if (speechLoopActiveRef.current) {
       speechBtn.classList.add('btn-danger');
     } else if (themeName === 'day') {
       speechBtn.classList.add('btn-outline-dark');
@@ -227,24 +215,28 @@ export default function CounterPage() {
       console.warn('Web Audio API not supported in this browser');
       return;
     }
-    if (backgroundAudioContext) {
+    if (backgroundAudioContextRef.current) {
       return;
     }
 
-    backgroundAudioContext = new (globalThis.AudioContext || globalThis.webkitAudioContext)();
-    backgroundMusicGain = backgroundAudioContext.createGain();
-    backgroundMusicGain.gain.value = 0;
-    backgroundMusicGain.connect(backgroundAudioContext.destination);
+    backgroundAudioContextRef.current = new (globalThis.AudioContext || globalThis.webkitAudioContext)();
+    backgroundMusicGainRef.current = backgroundAudioContextRef.current.createGain();
+    backgroundMusicGainRef.current.gain.value = 0;
+    backgroundMusicGainRef.current.connect(backgroundAudioContextRef.current.destination);
 
-    const osc = backgroundAudioContext.createOscillator();
+    const osc = backgroundAudioContextRef.current.createOscillator();
     osc.type = 'triangle';
     osc.frequency.value = 196;
-    osc.connect(backgroundMusicGain);
+    osc.connect(backgroundMusicGainRef.current);
     osc.start();
   }
 
   function scheduleTannPulse(startTime) {
-    const envelope = backgroundMusicGain.gain;
+    const gain = backgroundMusicGainRef.current;
+    if (!gain) {
+      return;
+    }
+    const envelope = gain.gain;
     const peak = 2.6 + Math.random() * 0.8;
     const decay = 1 + Math.random() * 0.5;
     envelope.cancelScheduledValues(startTime);
@@ -255,10 +247,10 @@ export default function CounterPage() {
   }
 
   function playTannSequence() {
-    if (!backgroundAudioContext || !backgroundMusicGain) {
+    if (!backgroundAudioContextRef.current || !backgroundMusicGainRef.current) {
       return;
     }
-    const now = backgroundAudioContext.currentTime;
+    const now = backgroundAudioContextRef.current.currentTime;
     scheduleTannPulse(now + 0.1);
     scheduleTannPulse(now + 0.35);
     scheduleTannPulse(now + 0.5);
@@ -268,35 +260,51 @@ export default function CounterPage() {
 
   function startBackgroundMusic() {
     ensureBackgroundMusic();
-    if (!backgroundAudioContext || !backgroundMusicGain) {
+    if (!backgroundAudioContextRef.current || !backgroundMusicGainRef.current) {
       return;
     }
 
-    if (backgroundAudioContext.state === 'suspended') {
-      backgroundAudioContext.resume();
+    if (backgroundAudioContextRef.current.state === 'suspended') {
+      backgroundAudioContextRef.current.resume();
     }
 
     playTannSequence();
-    if (backgroundMusicPulseInterval) {
-      clearInterval(backgroundMusicPulseInterval);
+    if (backgroundMusicPulseIntervalRef.current) {
+      clearInterval(backgroundMusicPulseIntervalRef.current);
     }
-    backgroundMusicPulseInterval = setInterval(playTannSequence, 1800);
+    const intervalId = setInterval(playTannSequence, 1800);
+    backgroundMusicPulseIntervalRef.current = intervalId;
+    
   }
 
   function stopBackgroundMusic() {
-    if (backgroundMusicPulseInterval) {
-      clearInterval(backgroundMusicPulseInterval);
-      backgroundMusicPulseInterval = null;
+    if (backgroundMusicPulseIntervalRef.current) {
+      clearInterval(backgroundMusicPulseIntervalRef.current);
+      backgroundMusicPulseIntervalRef.current = null;
+      
     }
-    if (!backgroundAudioContext || !backgroundMusicGain) {
+    if (!backgroundAudioContextRef.current || !backgroundMusicGainRef.current) {
       return;
     }
-    backgroundMusicGain.gain.cancelScheduledValues(backgroundAudioContext.currentTime);
-    backgroundMusicGain.gain.setTargetAtTime(0, backgroundAudioContext.currentTime, 0.2);
+    backgroundMusicGainRef.current.gain.cancelScheduledValues(backgroundAudioContextRef.current.currentTime);
+    backgroundMusicGainRef.current.gain.setTargetAtTime(0, backgroundAudioContextRef.current.currentTime, 0.2);
+  }
+
+  const utteranceOnEnd = function() {
+    if (speechLoopActiveRef.current) {
+      speechTimeoutRef.current = setTimeout(speakNaam, 250);
+      setTotalCount(totalCount+1)
+    }
+  }
+
+  const utteranceOnError = function() {
+    if (speechLoopActiveRef.current) {
+      speechTimeoutRef.current = setTimeout(speakNaam, 500);
+    }
   }
 
   function speakNaam() {
-    if (!speechLoopActive) {
+    if (!speechLoopActiveRef.current) {
       return;
     }
 
@@ -308,48 +316,75 @@ export default function CounterPage() {
     }
 
     const utterance = new SpeechSynthesisUtterance(naam);
-    if (hindiVoice) {
-      utterance.voice = hindiVoice;
+    if (hindiVoiceRef.current) {
+      utterance.voice = hindiVoiceRef.current;
     } else {
       utterance.lang = 'hi-IN';
     }
     utterance.rate = 0.8;
     utterance.pitch = 0.6;
     utterance.volume = 0.8;
-
-    utterance.onend = function() {
-      if (!speechLoopActive) {
-        return;
-      }
-      incrementBtnClick()
-      setTimeout(speakNaam, 250);
-    };
-
-    utterance.onerror = function() {
-      if (speechLoopActive) {
-        setTimeout(speakNaam, 500);
-      }
-    };
-
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utterance);
+    utterance.onend = utteranceOnEnd;
+    utterance.onerror = utteranceOnError;
+    speechSynthesisRef?.cancel?.();
+    speechSynthesisRef?.speak?.(utterance);
   }
 
   function updateDisplay() {
     const tmpCompletedMaala = Math.floor(totalCount / MAALA_SIZE);
     const tmpCurrentCycle = totalCount % MAALA_SIZE
-    const tmpRemaining = currentCycle === MAALA_SIZE ? MAALA_SIZE : MAALA_SIZE - currentCycle;
+    const tmpRemaining = tmpCurrentCycle === 0 && totalCount > 0 ? MAALA_SIZE : MAALA_SIZE - tmpCurrentCycle;
 
     setCompletedMaala(tmpCompletedMaala);
     setRemaining(tmpRemaining);
     setCurrentCycle(tmpCurrentCycle)
-
   }
 
   useEffect(() => {
+    speechLoopActiveRef.current = speechLoopActive;
+    if (speechLoopActive) {
+      startSpeechLoop();
+    } else {
+      stopSpeechLoop();
+    }
+  }, [speechLoopActive]);
+
+  useEffect(() => {
     doPageLoadTasks();
-    incrementBtnClick();
+    const speechSynthesisApi = speechSynthesisRef;
+    if (!speechSynthesisApi) {
+      updateSpeechVoiceStatus('Speech synthesis not supported', 'text-danger');
+      return undefined;
+    }
+
+    startHindiVoiceLoad();
+    loadHindiVoice();
+
+    const handleVoicesChanged = () => loadHindiVoice();
+    speechSynthesisApi.addEventListener?.('voiceschanged', handleVoicesChanged);
+    speechSynthesisApi.onvoiceschanged = handleVoicesChanged;
+
+    return () => {
+      speechSynthesisApi.removeEventListener?.('voiceschanged', handleVoicesChanged);
+      if (speechSynthesisApi.onvoiceschanged === handleVoicesChanged) {
+        speechSynthesisApi.onvoiceschanged = null;
+      }
+      if (voiceStatusHideTimeoutRef.current) {
+        clearTimeout(voiceStatusHideTimeoutRef.current);
+      }
+      if (speechTimeoutRef.current) {
+        clearTimeout(speechTimeoutRef.current);
+      }
+      if (backgroundMusicPulseIntervalRef.current) {
+        clearInterval(backgroundMusicPulseIntervalRef.current);
+      }
+      speechSynthesisApi.cancel?.();
+    };
   }, []);
+
+  useEffect(() => {
+    updateDisplay();
+  }, [totalCount]);
 
   return (
     <div className="container text-left" id={"counterBody"} style={{ minWidth: '100%' }}>
@@ -359,8 +394,7 @@ export default function CounterPage() {
             <label htmlFor="naamInput" className="form-label">Naam being recited</label>
             <input
               type="text"
-              value="Radha"
-              onChange={resetBtnClick}
+              defaultValue="Radha"
               className="form-control bg-black text-light border-secondary"
               id="naamInput"
               list="naamSuggestions"
@@ -374,18 +408,17 @@ export default function CounterPage() {
               <option value="ॐ कृष्णाय वासुदेवाय हरये परमात्मने। प्रणतः क्लेशनाशाय गोविन्दाय नमो नमः॥"></option>
               <option value="हरे कृष्ण हरे कृष्ण कृष्ण कृष्ण हरे हरे। हरे राम हरे राम राम राम हरे हरे॥"></option>
             </datalist>
-            {/* <div className="form-text text-secondary mt-2">Suggestions: Radha · Raam · Saamb sadashiv · ॐ कृष्णाय वासुदेवाय हरये परमात्मने। प्रणतः क्लेशनाशाय गोविन्दाय नमो नमः॥ · हरे कृष्ण हरे कृष्ण कृष्ण कृष्ण हरे हरे। हरे राम हरे राम राम राम हरे हरे॥</div> */}
           </div>
-          <div className="mb-3">
-            <label className="form-label">Theme</label>
-            <div id="themeButtons" className="btn-group d-flex flex-nowrap gap-1" role="group" aria-label="Theme selection">
+          <fieldset className="mb-3">
+            <legend className="form-label mb-2">Theme</legend>
+            <div id="themeButtons" className="btn-group d-flex flex-nowrap gap-1">
               <button type="button" className="btn btn-outline-light btn-sm flex-fill active" data-theme="default" style={{ minWidth: 0, padding: '.35rem .55rem' }}>Night</button>
               <button type="button" className="btn btn-outline-light btn-sm flex-fill" data-theme="day" style={{ minWidth: 0, padding: '.35rem .55rem' }}>Day</button>
               <button type="button" className="btn btn-outline-light btn-sm flex-fill" data-theme="yellowish" style={{ minWidth: 0, padding: '.35rem .55rem' }}>Yellow</button>
               <button type="button" className="btn btn-outline-light btn-sm flex-fill" data-theme="bluish" style={{ minWidth: 0, padding: '.35rem .55rem' }}>Blue</button>
               <button type="button" className="btn btn-outline-light btn-sm flex-fill" data-theme="greenish" style={{ minWidth: 0, padding: '.35rem .55rem' }}>Green</button>
             </div>
-          </div>
+          </fieldset>
           <p className="mb-4">Track your recitation. 1 maala = {MAALA_SIZE} repetitions.</p>
 
           <div className="mb-3">
@@ -396,7 +429,7 @@ export default function CounterPage() {
                 className="form-control bg-black text-light border-secondary"
                 id="increment"
                 value={currentCycle}
-                onInput={(ele) => incrementOnInput(ele)}
+                onChange={(ele) => console.log(ele.val)}
                 style={{ fontSize: '2rem', textAlign: 'center' }}
               />
               <span className="input-group-text bg-black text-light border-secondary" id="incrementStep">/ {MAALA_SIZE}</span>
@@ -417,14 +450,14 @@ export default function CounterPage() {
                 <span id="speechBtnIcon" aria-hidden="true">🔊</span>
                 <span id="speechBtnLabel">Start Speech</span>
               </button>
-              <div id="speechVoiceStatus" className="form-text text-warning mt-2">Loading Hindi voice…</div>
+              <div id="speechVoiceStatus" className={`form-text mt-2 ${hindiVoiceStatusClass}`}>{hindiVoiceStatus}</div>
             </div>
           </div>
           totalCount{totalCount}<br />
           speechLoopActive{Number(speechLoopActive)}
           <div className="d-flex justify-content-between small">
             <div>Completed maala: <span id="completedMaala">{completedMaala}</span></div>
-            <div>Remaining: <span id="remainingCount">{(remaining-1) || MAALA_SIZE}</span></div>
+            <div>Remaining: <span id="remainingCount">{remaining}</span></div>
           </div>
         </div>
       </div>
