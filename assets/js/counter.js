@@ -1,4 +1,26 @@
 const token = $.cookie('access_token');
+
+// SEO metadata reference for the counter page
+// title: The Good Human
+// description: The Good Human counter page for tracking counts, themes, and speech-assisted counting in a personalized dashboard.
+// keywords: The Good Human counter, counting dashboard, maala counter, speech counter, Hindi voice counter, personalized counter, theme switcher, productivity counter, devotional counter, tracking tool
+const SEO_METADATA = {
+  title: 'The Good Human',
+  description: 'The Good Human counter page for tracking counts, themes, and speech-assisted counting in a personalized dashboard.',
+  keywords: [
+    'The Good Human counter',
+    'counting dashboard',
+    'maala counter',
+    'speech counter',
+    'Hindi voice counter',
+    'personalized counter',
+    'theme switcher',
+    'productivity counter',
+    'devotional counter',
+    'tracking tool',
+  ],
+};
+
 const MAALA_SIZE = 108;
 let totalCount = 0;
 let speechLoopActive = false;
@@ -21,14 +43,12 @@ $('#counter-form').hide();
 $(document).ready(async function() {
   document.getElementById('incrementBtn').addEventListener('click', function() {
     changeCount(1);
-    // startBackgroundMusic();
   });
 
   document.getElementById('resetBtn').addEventListener('click', function() {
     totalCount = 0;
     updateDisplay();
     stopSpeechLoop();
-    // stopBackgroundMusic();
   });
 
   document.getElementById('speechBtn').addEventListener('click', function() {
@@ -78,13 +98,8 @@ function applyTheme(name) {
 
   const themeButtons = document.querySelectorAll('#themeButtons button[data-theme]');
   themeButtons.forEach(button => {
-    if (name === 'day') {
-      button.classList.remove('btn-outline-light');
-      button.classList.add('btn-outline-dark');
-    } else {
-      button.classList.remove('btn-outline-dark');
-      button.classList.add('btn-outline-light');
-    }
+    button.classList.remove('btn-outline-light', 'btn-outline-dark');
+    button.classList.add(name === 'day' ? 'btn-outline-dark' : 'btn-outline-light');
   });
 
   // Ensure buttons contrast properly on 'day' theme (light card)
@@ -97,8 +112,7 @@ function applyTheme(name) {
         elem.style.backgroundColor = 'transparent';
         elem.style.color = theme.text;
         elem.style.borderColor = theme.text;
-        elem.classList.remove("bg-black");
-        elem.classList.remove("text-light");
+        elem.classList.remove('bg-black', 'text-light');
       }
       
     } else {
@@ -107,8 +121,7 @@ function applyTheme(name) {
         elem.style.backgroundColor = '';
         elem.style.color = '';
         elem.style.borderColor = '';
-        elem.classList.add("bg-black");
-        elem.classList.add("text-light");
+        elem.classList.add('bg-black', 'text-light');
       }
     }
   });
