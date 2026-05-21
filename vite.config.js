@@ -7,4 +7,8 @@ export default defineConfig({
     host: '0.0.0.0'
   },
   publicDir: 'public',
+  build: {
+    outDir: 'docs',
+    emptyOutDir: true
+  },
 });
