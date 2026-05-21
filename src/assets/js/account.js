@@ -1,7 +1,10 @@
 const token = $.cookie('access_token');
 $('#account-form').hide();
-
+const secureUrls = ['account']
 $( document ).ready(async function() {
+    const pathname = window.location.pathname.split('/');
+    const path = pathname[1];
+    if (!secureUrls.includes(path)) return;
     if(token) getAccount();
     else window.location.href = $('#login-url').prop('href');
 });
