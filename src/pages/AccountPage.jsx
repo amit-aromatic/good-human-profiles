@@ -15,13 +15,13 @@ export default function AccountPage() {
   const secureUrls = new Set(['account']);
   const [token, setToken] = useState(null);
 
-  const getAccount = async () => {
+  const getAccount = async (access_token) => {
       const settings = {
           "url": "https://api.goodhuman.in/me",
           "method": "GET",
           "timeout": 0,
           "headers": {
-            "Authorization": `Bearer ${token}`,
+            "Authorization": `Bearer ${access_token}`,
             "Access-Control-Allow-Origin": globalThis.location.origin
           },
         };
@@ -50,7 +50,7 @@ export default function AccountPage() {
       
       $.ajax(settings).done(function (response) {
         $('#saveAccountBtn').prop('disabled', false);
-        getAccount();
+        getAccount(token);
       });
   };
 
@@ -61,7 +61,7 @@ export default function AccountPage() {
     const pathname = globalThis.location.pathname.split('/');
     const path = pathname[1];
     if (!secureUrls.has(path)) return;
-    if(access_token) getAccount();
+    if(access_token) getAccount(access_token);
     else globalThis.location.href = $('#login-url').prop('href');
   }, []);
 
