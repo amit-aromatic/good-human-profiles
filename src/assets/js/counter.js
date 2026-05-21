@@ -86,8 +86,9 @@ $(document).ready(async function() {
 
 function applyTheme(name) {
   const theme = themes[name] || themes.default;
-  document.body.style.backgroundColor = theme.body;
-  document.body.style.color = theme.text;
+  const bodyElem = document.getElementById('counterBody')
+  bodyElem.style.backgroundColor = theme.body;
+  bodyElem.style.color = theme.text;
 
   const counterCard = document.getElementById('counter');
   if (counterCard) {
