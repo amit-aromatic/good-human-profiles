@@ -291,10 +291,12 @@ export default function CounterPage() {
   }
 
   const utteranceOnEnd = function() {
-    if (speechLoopActiveRef.current) {
-      speechTimeoutRef.current = setTimeout(speakNaam, 250);
-      setTotalCount(totalCount+1)
+    if (!speechLoopActiveRef.current) {
+      return;
     }
+
+    setTotalCount(prevTotalCount => Math.max(0, prevTotalCount + 1));
+    speechTimeoutRef.current = setTimeout(speakNaam, 250);
   }
 
   const utteranceOnError = function() {
@@ -453,8 +455,7 @@ export default function CounterPage() {
               <div id="speechVoiceStatus" className={`form-text mt-2 ${hindiVoiceStatusClass}`}>{hindiVoiceStatus}</div>
             </div>
           </div>
-          totalCount{totalCount}<br />
-          speechLoopActive{Number(speechLoopActive)}
+          
           <div className="d-flex justify-content-between small">
             <div>Completed maala: <span id="completedMaala">{completedMaala}</span></div>
             <div>Remaining: <span id="remainingCount">{remaining}</span></div>
