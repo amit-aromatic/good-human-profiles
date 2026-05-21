@@ -8,7 +8,7 @@ if (!staticPages.has(pathnameStr) && pathname.length > 2 && pathname[2].length) 
     globalThis.location.href = "/error/not-found";
 }
 const profile = pathname[1];
-await getData(profile);
+getData(profile);
 
 const noDataCard = `
 <div class="card mb-2" style="width: 100%;">

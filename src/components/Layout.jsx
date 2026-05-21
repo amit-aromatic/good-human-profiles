@@ -1,9 +1,17 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 const loginUrl = 'https://login.goodhuman.in/oauth2/authorize?client_id=6npcn6fde0tucr6npeq625optk&response_type=code&scope=api%2Fall+aws.cognito.signin.user.admin+email+openid&redirect_uri=https%3A%2F%2Fthe.goodhuman.in%2F';
 const logoutUrl = 'https://login.goodhuman.in/logout?client_id=6npcn6fde0tucr6npeq625optk&response_type=code&scope=api%2Fall+aws.cognito.signin.user.admin+email+openid&logout_uri=https%3A%2F%2Fthe.goodhuman.in%2Flogout.html';
 
 export default function Layout() {
+  const [token, setToken] = useState(null);
+  
+  useEffect(() => {
+    const access_token = $.cookie('access_token');
+    setToken(access_token)
+  }, []);
+
   return (
     <div className="d-flex flex-column min-vh-100">
       <header>
@@ -21,10 +29,10 @@ export default function Layout() {
               </ul>
               <div className="d-flex" role="search">
                 <ul className="navbar-nav">
-                  <li className="nav-item me-2">
+                  {!token && <li className="nav-item me-2">
                     <a id="login-url" className="nav-link" href={loginUrl}>Login</a>
-                  </li>
-                  <li className="nav-item dropdown me-2">
+                  </li>}
+                  {token && <li className="nav-item dropdown me-2">
                     <button className="nav-link dropdown-toggle btn btn-link" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                       User
                     </button>
@@ -33,7 +41,7 @@ export default function Layout() {
                       <li><Link className="dropdown-item" to="/counter">My Counter</Link></li>
                       <li><a id="logout-url" className="dropdown-item" href={logoutUrl}>Logout</a></li>
                     </ul>
-                  </li>
+                  </li>}
                 </ul>
               </div>
             </div>
