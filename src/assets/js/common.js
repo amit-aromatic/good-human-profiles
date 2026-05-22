@@ -1,6 +1,6 @@
 $( document ).ready(async function() {
     setLoginLogoutUrl();
-    const username = typeof cookieStore !== 'undefined' ? await cookieStore.get('username') : $.cookie('username');
+    const username = typeof cookieStore === 'undefined' ? $.cookie('username') : await cookieStore.get('username');
     if (username) showUsername(username.value || username);
 });
 

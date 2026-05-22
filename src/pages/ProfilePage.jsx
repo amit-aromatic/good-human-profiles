@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { SEO as profiles } from '../assets/js/constants.js';
+import { useEffect } from 'react';
 
 export default function ProfilePage() {
   const { slug } = useParams();
@@ -16,6 +17,121 @@ export default function ProfilePage() {
       metaKeywords.setAttribute('content', profile.keywords);
     }
   }
+  
+  useEffect(() => {
+    getData(slug);
+  }, [])
+
+  const noDataCard = `
+  <div class="card mb-2" style="width: 100%;">
+      <div class="card-body">
+          <p class="card-text">No data as of now, feature coming soon!</p>
+      </div>
+  </div>
+  `;
+
+  async function getData(slug) {
+
+      const url = `https://the-good-human.s3.ap-south-1.amazonaws.com/profiles/${slug}.json`;
+      const res = await fetch(url);
+      if (res.status === 403) globalThis.location.href = "/error/not-found";
+      const data = await res.json();
+      
+      // name
+      $('#data_name').html(data.name);
+
+      // externalLinks
+      const externalLinks = data.externalLinks || [];
+      if (!externalLinks.length) $("#data_externalLinks").hide();
+      const externalLinksData = externalLinks.filter(item => item.published)
+          .map(item => `<a target="_blank" href="${item.url}">${item.platform}</a>` );
+      $('#data_externalLinks').html(externalLinksData.join('<br/>'));
+
+      // picture
+      if (data.picture?.length) {
+          $('#data_picture').html(`<img src="${data.picture}" style="width: 100%;">`);
+      }
+      else {
+          $('#data_picture').hide();
+      }
+      
+      // skills
+      const skills = data.skills|| [];
+      if (!skills.length) $("#skills-wrap").hide();
+      const skillsData = skills.map(item => `<li>${item.text}</li>`);
+      $('#data_skills').html(skillsData.join(''));
+
+      // traits
+      const traits = data.traits|| [];
+      if (!traits.length) $("#traits-wrap").hide();
+      const traitsData = traits.map(item => `<li>${item.text}</li>`);
+      $('#data_traits').html(traitsData.join(''));
+
+      // left-pane
+      if (!skills.length && !traits.length && !externalLinks.length) {
+          $('#left-pane').hide();
+      }
+
+      // story
+      const story = data.story;
+      story ? setStoryData(story) : $('#data_story-tab').hide();
+
+      // testimonials
+      const testimonials = data.testimonials|| [];
+      testimonials.length ? setTestominalsData(testimonials) : $('#data_testimonials-tab').hide();
+      
+      // endorsements
+      const endorsements = data.endorsements|| [];
+      endorsements.length ? setEndorsementsData(endorsements) : $('#data_endorsements-tab').hide();
+      
+      // right-pane
+      if ($('#pills-tab .nav-link:visible').length) $('#pills-tab .nav-link:visible')[0].click();
+      if (!endorsements.length && !testimonials.length && !story) {
+          $('#right-pane').hide();
+      }
+  }
+
+  function setStoryData(story) {
+      const storyData = `<div class="card mb-2" style="width: 100%;">
+      <div class="card-body">
+          <p class="card-text">${story.text}</p>
+      </div>
+      </div>`;
+      $('#data_story').html(storyData || noDataCard);
+  }
+
+  function setEndorsementsData(endorsements) {
+      const endorsementsData = endorsements.filter(item => item.published).map(item => {
+          return `<div class="card mb-2" style="width: 100%;">
+              <div class="card-body">
+                  <p class="card-text">${item.text}</p>
+                  <p class="card-link text-end">
+                  ${item.author}
+                  <br/>
+                  <i style="color: gray;">${item.relation}</i>
+                  </p>
+              </div>
+          </div>`;
+      });
+      $('#data_endorsements').html(endorsementsData.join('') || noDataCard);
+  }
+
+  function setTestominalsData(testimonials) {
+      const testimonialsData = testimonials.filter(item => item.published).map(item => {
+          return `<div class="card mb-2" style="width: 100%;">
+              <div class="card-body">
+                  <p class="card-text">${item.text}</p>
+                  <p class="card-link text-end">
+                  ${item.author}
+                  <br/>
+                  <i style="color: gray;">${item.relation}</i>
+                  </p>
+              </div>
+          </div>`;
+      });
+      $('#data_testimonials').html(testimonialsData.join('') || noDataCard);
+  }
+
 
   return (
     <div className="container text-left">
