@@ -5,12 +5,41 @@ const loginUrl = 'https://login.goodhuman.in/oauth2/authorize?client_id=6npcn6fd
 const logoutUrl = 'https://login.goodhuman.in/logout?client_id=6npcn6fde0tucr6npeq625optk&response_type=code&scope=api%2Fall+aws.cognito.signin.user.admin+email+openid&logout_uri=https%3A%2F%2Fthe.goodhuman.in%2Flogout.html';
 
 export default function Layout() {
-  const [token, setToken] = useState(null);
+
+  const [username, setUsername] = useState(null);
   
+  const readCookies = async() => {
+    const usernameCookie = typeof cookieStore === 'undefined' ? $.cookie('username') : await cookieStore.get('username');
+    if (usernameCookie) setUsername(usernameCookie);
+  }
+
   useEffect(() => {
-    const access_token = $.cookie('access_token');
-    setToken(access_token)
+    setLoginLogoutUrl();
+    readCookies();
   }, []);
+
+  useEffect(() => {
+    if (username) showUsername(username.value || username);
+    else showLogin();
+  }, [username])
+
+  const showLogin = () => {
+    $('#logout-nav').hide();
+    $('#login-nav').show();
+  }
+
+  const showUsername = (username) => {
+    $('#logout-nav').show();
+    $('#login-nav').hide();
+  }
+
+  const setLoginLogoutUrl = () => {
+    const domain = 'https://login.goodhuman.in';
+    const client_id = '6npcn6fde0tucr6npeq625optk';
+    const scope = 'api%2Fall+aws.cognito.signin.user.admin+email+openid';
+    $('#login-url').prop('href', `${domain}/oauth2/authorize?client_id=${client_id}&response_type=code&scope=${scope}&redirect_uri=https%3A%2F%2Fthe.goodhuman.in%2F`);
+    $('#logout-url').prop('href', `${domain}/logout?client_id=${client_id}&response_type=code&scope=${scope}&logout_uri=https%3A%2F%2Fthe.goodhuman.in%2Flogout.html`);
+  }
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -29,10 +58,10 @@ export default function Layout() {
               </ul>
               <div className="d-flex" role="search">
                 <ul className="navbar-nav">
-                  {!token && <li className="nav-item me-2">
+                  <li id='login-nav' className="nav-item me-2">
                     <a id="login-url" className="nav-link" href={loginUrl}>Login</a>
-                  </li>}
-                  {token && <li className="nav-item dropdown me-2">
+                  </li>
+                  <li id='logout-nav' className="nav-item dropdown me-2">
                     <button className="nav-link dropdown-toggle btn btn-link" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                       User
                     </button>
@@ -41,7 +70,7 @@ export default function Layout() {
                       <li><Link className="dropdown-item" to="/counter">My Counter</Link></li>
                       <li><a id="logout-url" className="dropdown-item" href={logoutUrl}>Logout</a></li>
                     </ul>
-                  </li>}
+                  </li>
                 </ul>
               </div>
             </div>
