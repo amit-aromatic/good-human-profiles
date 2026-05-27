@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
-const loginUrl = 'https://login.goodhuman.in/oauth2/authorize?client_id=6npcn6fde0tucr6npeq625optk&response_type=code&scope=api%2Fall+aws.cognito.signin.user.admin+email+openid&redirect_uri=https%3A%2F%2Fthe.goodhuman.in%2F';
-const logoutUrl = 'https://login.goodhuman.in/logout?client_id=6npcn6fde0tucr6npeq625optk&response_type=code&scope=api%2Fall+aws.cognito.signin.user.admin+email+openid&logout_uri=https%3A%2F%2Fthe.goodhuman.in%2Flogout.html';
+const loginUrl = 'https://auth.goodhuman.in/oauth2/authorize?client_id=3p4bfqrmveackaqks6s4fndkn6&response_type=code&scope=api%2Fall+aws.cognito.signin.user.admin+email+openid&redirect_uri=https%3A%2F%2Fthe.goodhuman.in%2F';
+const logoutUrl = 'https://auth.goodhuman.in/logout?client_id=3p4bfqrmveackaqks6s4fndkn6&response_type=code&scope=api%2Fall+aws.cognito.signin.user.admin+email+openid&logout_uri=https%3A%2F%2Fthe.goodhuman.in%2Flogout.html';
 
 export default function Layout() {
 
@@ -34,8 +34,8 @@ export default function Layout() {
   }
 
   const setLoginLogoutUrl = () => {
-    const domain = 'https://login.goodhuman.in';
-    const client_id = '6npcn6fde0tucr6npeq625optk';
+    const domain = 'https://auth.goodhuman.in';
+    const client_id = '3p4bfqrmveackaqks6s4fndkn6';
     const scope = 'api%2Fall+aws.cognito.signin.user.admin+email+openid';
     $('#login-url').prop('href', `${domain}/oauth2/authorize?client_id=${client_id}&response_type=code&scope=${scope}&redirect_uri=https%3A%2F%2Fthe.goodhuman.in%2F`);
     $('#logout-url').prop('href', `${domain}/logout?client_id=${client_id}&response_type=code&scope=${scope}&logout_uri=https%3A%2F%2Fthe.goodhuman.in%2Flogout.html`);
