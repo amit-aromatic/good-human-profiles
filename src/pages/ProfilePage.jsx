@@ -32,7 +32,7 @@ export default function ProfilePage() {
 
   async function getData(slug) {
 
-      const url = `https://the-good-human.s3.ap-south-1.amazonaws.com/profiles/${slug}.json`;
+      const url = `https://the-good-human-549914804638-ap-south-1-an.s3.ap-south-1.amazonaws.com/profiles/${slug}.json`;
       const res = await fetch(url);
       if (res.status === 403) globalThis.location.href = "/error/not-found";
       const data = await res.json();
