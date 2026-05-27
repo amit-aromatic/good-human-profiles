@@ -17,7 +17,7 @@ export default function AccountPage() {
 
   const getAccount = async (access_token) => {
       const settings = {
-          "url": "https://api.goodhuman.in/me",
+          "url": "https://api-v1.goodhuman.in/me",
           "method": "GET",
           "timeout": 0,
           "headers": {
@@ -38,7 +38,7 @@ export default function AccountPage() {
   const putAccount = async () => {
     $('#saveAccountBtn').prop('disabled', true)
     const settings = {
-        "url": "https://api.goodhuman.in/me",
+        "url": "https://api-v1.goodhuman.in/me",
         "method": "PUT",
         "timeout": 0,
         "headers": {
