@@ -16,42 +16,42 @@ export default function AccountPage() {
   const [token, setToken] = useState(null);
 
   const getAccount = async (access_token) => {
-      const settings = {
-          "url": "https://api-v1.goodhuman.in/me",
-          "method": "GET",
-          "timeout": 0,
-          "headers": {
-            "Authorization": `Bearer ${access_token}`,
-            "Access-Control-Allow-Origin": globalThis.location.origin
-          },
-        };
-        
-        $.ajax(settings).done(function (response) {
-          const username = response.find(v => v.Name==='email').Value;
-          const name = response.find(v => v.Name==='name')?.Value;
-          $('#inputEmail').val(username);
-          $('#inputName').val(name);
-          $('#account-form').show();
-        });
+    const settings = {
+      "url": "https://api-v1.goodhuman.in/me",
+      "method": "GET",
+      "timeout": 0,
+      "headers": {
+        "Authorization": `Bearer ${access_token}`,
+        // "Access-Control-Allow-Origin": globalThis.location.origin
+      },
+    };
+    
+    $.ajax(settings).done(function (response) {
+      const username = response.find(v => v.Name==='email').Value;
+      const name = response.find(v => v.Name==='name')?.Value;
+      $('#inputEmail').val(username);
+      $('#inputName').val(name);
+      $('#account-form').show();
+    });
   };
 
   const putAccount = async () => {
     $('#saveAccountBtn').prop('disabled', true)
     const settings = {
-        "url": "https://api-v1.goodhuman.in/me",
-        "method": "PUT",
-        "timeout": 0,
-        "headers": {
-          "Authorization": `Bearer ${token}`,
-          "Access-Control-Allow-Origin": globalThis.location.origin
-        },
-        "data": JSON.stringify({ name: $('#inputName').val() })
-      };
-      
-      $.ajax(settings).done(function (response) {
-        $('#saveAccountBtn').prop('disabled', false);
-        getAccount(token);
-      });
+      "url": "https://api-v1.goodhuman.in/me",
+      "method": "PUT",
+      "timeout": 0,
+      "headers": {
+        "Authorization": `Bearer ${token}`,
+        // "Access-Control-Allow-Origin": globalThis.location.origin
+      },
+      "data": JSON.stringify({ name: $('#inputName').val() })
+    };
+    
+    $.ajax(settings).done(function (response) {
+      $('#saveAccountBtn').prop('disabled', false);
+      getAccount(token);
+    });
   };
 
   useEffect(() => {
