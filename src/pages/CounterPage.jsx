@@ -388,8 +388,44 @@ export default function CounterPage() {
     updateDisplay();
   }, [totalCount]);
 
+  // Playlist configuration
+  const PLAYLIST_ID = 'PLwopdMcwj9YjoaI8RNBx-PIboQyXbxusQ';
+  const [playlistItems, setPlaylistItems] = useState([]);
+  const [playlistLoading, setPlaylistLoading] = useState(false);
+  const [playlistError, setPlaylistError] = useState('');
+
+  async function fetchPlaylist() {
+    const apiKey = "AIzaSyDgWr0IPTIVFj1O3r0oIhKQMyafVgIwMt4";
+    if (!apiKey) {
+      setPlaylistError('No YouTube API key found. Set `window.YOUTUBE_API_KEY` to load video list.');
+      return;
+    }
+    setPlaylistLoading(true);
+    try {
+      const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=25&playlistId=${PLAYLIST_ID}&key=${apiKey}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const data = await res.json();
+      const items = (data.items || []).map(i => ({
+        id: i.snippet.resourceId?.videoId,
+        title: i.snippet.title,
+        thumbnail: i.snippet.thumbnails?.medium?.url || i.snippet.thumbnails?.default?.url || '',
+      }));
+      setPlaylistItems(items);
+    } catch (err) {
+      setPlaylistError(String(err));
+    } finally {
+      setPlaylistLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchPlaylist();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <div className="container text-left" id={"counterBody"} style={{ minWidth: '100%' }}>
+    <div className="container text-left" id={"counterBody"} style={{ minWidth: '100%', minHeight: '90vh' }}>
       <div className="row p-2 justify-content-center">
         <div id="counter" className="col-12 col-md-6 p-4 bg-opacity-90 rounded-4 border border-secondary">
           <div className="mb-3">
@@ -460,6 +496,38 @@ export default function CounterPage() {
             <div>Completed maala: <span id="completedMaala">{completedMaala}</span></div>
             <div>Remaining: <span id="remainingCount">{remaining}</span></div>
           </div>
+
+          {/* Playlist sidebar: shows on md+ to the right, stacked under counter on small screens */}
+          <div id="playlistCol">
+            <div className="p-3">
+              {playlistLoading && <div className="text-muted">Loading videos…</div>}
+              {playlistError && (
+                <div className="alert alert-warning p-2 small" role="alert">
+                  {playlistError}
+                  <div className="mt-1"><a href={`https://www.youtube.com/playlist?list=${PLAYLIST_ID}`} target="_blank" rel="noreferrer">Open playlist on YouTube</a></div>
+                </div>
+              )}
+              {!playlistLoading && playlistItems.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'row', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem', justifyContent: 'space-evenly' }}>
+                  {playlistItems.map(item => (
+                    <a key={item.id} href={`https://www.youtube.com/watch?v=${item.id}&list=${PLAYLIST_ID}`} target="_blank" rel="noreferrer" className="d-flex flex-column flex-shrink-0 text-decoration-none" style={{ minWidth: 220 }}>
+                      <img src={item.thumbnail} alt="thumb" style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 6 }} />
+                      <div className="small mt-2" style={{ color: 'inherit' }}>{item.title}</div>
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {/* Fallback iframe visible when playlist items are not available */}
+              {!playlistLoading && !playlistItems.length && (
+                <div className="mt-3">
+                  <iframe width="100%" height="200" src={`https://www.youtube.com/embed/videoseries?list=${PLAYLIST_ID}`} title="YouTube playlist" frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
