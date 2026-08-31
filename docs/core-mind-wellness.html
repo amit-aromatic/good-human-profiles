@@ -103,6 +103,7 @@
       var PLACE_LATLNG = { lat: 28.4697709, lng: 77.0909095 };
 
       function showMessage(text) {
+        console.log(text);
         testimonialsEl.innerHTML =
           '<div class="card mb-2" style="width: 100%;"><div class="card-body">' +
           '<p class="card-text">' + text + '</p>' +
@@ -151,6 +152,7 @@
             '</div></div>'
           );
         }).join('');
+        console.log(summary + cards);
         testimonialsEl.innerHTML = summary + cards;
       }
 
