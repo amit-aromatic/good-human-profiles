@@ -170,12 +170,20 @@ export default function ProfilePage() {
             <li className="nav-item" role="presentation">
               <button className="nav-link" id="data_endorsements-tab" data-bs-toggle="pill" data-bs-target="#data_endorsements" type="button" role="tab" aria-controls="data_endorsements" aria-selected="false">Endorsements</button>
             </li>
+            {slug === 'core-mind-wellness' && (
+              <li className="nav-item" role="presentation">
+                <button className="nav-link" id="data_reviews-tab" data-bs-toggle="pill" data-bs-target="#data_reviews" type="button" role="tab" aria-controls="data_reviews" aria-selected="false">Reviews</button>
+              </li>
+            )}
           </ul>
           {/* content */}
           <div className="tab-content" id="pills-tabContent">
             <div className="tab-pane fade" id="data_story" role="tabpanel" aria-labelledby="data_story-tab" tabIndex="0"></div>
             <div className="tab-pane fade" id="data_testimonials" role="tabpanel" aria-labelledby="data_testimonials-tab" tabIndex="0"></div>
             <div className="tab-pane fade" id="data_endorsements" role="tabpanel" aria-labelledby="data_endorsements-tab" tabIndex="0"></div>
+            {slug === 'core-mind-wellness' && (
+              <div className="tab-pane fade" id="data_reviews" role="tabpanel" aria-labelledby="data_reviews-tab" tabIndex="0"></div>
+            )}
           </div>
         </div>
       </div>
