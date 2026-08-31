@@ -20,6 +20,7 @@ export default function ProfilePage() {
   
   useEffect(() => {
     getData(slug);
+    if (slug === 'core-mind-wellness') loadGoogleReviews();
   }, [])
 
   const noDataCard = `
@@ -112,6 +113,10 @@ export default function ProfilePage() {
       const storyData = `<div class="card mb-2" style="width: 100%;">
       <div class="card-body">
           <p class="card-text">${story.text}</p>
+          ${slug === 'core-mind-wellness' ? `
+            <div class="ratio ratio-16x9 mt-2">
+              <iframe src="https://www.google.com/maps?q=Core+Mind+Wellness,+Sector+28,+Gurgaon&amp;output=embed" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Core Mind Wellness location"></iframe>
+            </div>` : ''}
       </div>
       </div>`;
       $('#data_story').html(storyData || noDataCard);
@@ -149,6 +154,98 @@ export default function ProfilePage() {
       $('#data_testimonials').html(testimonialsData.join('') || noDataCard);
   }
 
+  // <!-- Live Google reviews (Places API) -->
+  const GOOGLE_MAPS_API_KEY = 'AIzaSyBKaJWfWSw077EKNT3SAHO0oNwKyPHRIQw';
+  const GOOGLE_REVIEWS_PLACE_QUERY = 'Core Mind Wellness, Sector 28, Gurgaon';
+  const GOOGLE_REVIEWS_PLACE_LATLNG = { lat: 28.4697709, lng: 77.0909095 };
+
+  function showReviewsMessage(text) {
+      $('#data_reviews').html(`<div class="card mb-2" style="width: 100%;"><div class="card-body"><p class="card-text">${text}</p></div></div>`);
+  }
+
+  function starIcons(rating) {
+      const full = Math.round(rating || 0);
+      let stars = '';
+      for (let i = 0; i < 5; i++) stars += i < full ? '★' : '☆';
+      return stars;
+  }
+
+  function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+  }
+
+  function renderGoogleReviews(place) {
+      const reviews = place && place.reviews;
+      if (!reviews || !reviews.length) {
+          showReviewsMessage('No reviews available right now.');
+          return;
+      }
+      const summary = place.rating
+          ? `<p class="text-secondary mb-3">${place.rating.toFixed(1)} ★ average from ${place.user_ratings_total || reviews.length} Google reviews</p>`
+          : '';
+      const cards = reviews.map((r) => {
+          const photo = r.profile_photo_url;
+          return `<div class="card mb-2" style="width: 100%;"><div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+              ${photo ? `<img src="${photo}" alt="" style="width:40px;height:40px;border-radius:50%;margin-right:10px;">` : ''}
+              <div>
+                  <div><strong>${escapeHtml(r.author_name)}</strong></div>
+                  <div style="color:#f5a623;">${starIcons(r.rating)}</div>
+              </div></div>
+              <p class="card-text">${escapeHtml(r.text)}</p>
+              <small class="text-secondary">${escapeHtml(r.relative_time_description)} &middot; via Google</small>
+          </div></div>`;
+      }).join('');
+      $('#data_reviews').html(summary + cards);
+  }
+
+  function fetchGoogleReviews() {
+      if (!window.google || !google.maps || !google.maps.places) {
+          showReviewsMessage('Unable to load reviews right now.');
+          return;
+      }
+      const service = new google.maps.places.PlacesService(document.createElement('div'));
+      service.findPlaceFromQuery(
+          {
+              query: GOOGLE_REVIEWS_PLACE_QUERY,
+              fields: ['place_id'],
+              locationBias: new google.maps.LatLng(GOOGLE_REVIEWS_PLACE_LATLNG.lat, GOOGLE_REVIEWS_PLACE_LATLNG.lng)
+          },
+          (results, status) => {
+              if (status !== google.maps.places.PlacesServiceStatus.OK || !results || !results.length) {
+                  showReviewsMessage('Unable to load reviews right now.');
+                  return;
+              }
+              service.getDetails(
+                  { placeId: results[0].place_id, fields: ['reviews', 'rating', 'user_ratings_total'] },
+                  (place, detailStatus) => {
+                      if (detailStatus !== google.maps.places.PlacesServiceStatus.OK || !place) {
+                          showReviewsMessage('Unable to load reviews right now.');
+                          return;
+                      }
+                      renderGoogleReviews(place);
+                  }
+              );
+          }
+      );
+  }
+
+  function loadGoogleReviews() {
+      if (window.google?.maps?.places) {
+          fetchGoogleReviews();
+          return;
+      }
+      if (document.getElementById('google-places-script')) return;
+      window.initGoogleReviews = fetchGoogleReviews;
+      const script = document.createElement('script');
+      script.id = 'google-places-script';
+      script.async = true;
+      script.defer = true;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=initGoogleReviews`;
+      document.body.appendChild(script);
+  }
 
   return (
     <div className="container text-left">
