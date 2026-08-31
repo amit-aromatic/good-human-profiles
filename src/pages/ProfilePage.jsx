@@ -43,9 +43,26 @@ export default function ProfilePage() {
       // externalLinks
       const externalLinks = data.externalLinks || [];
       if (!externalLinks.length) $("#data_externalLinks").hide();
+      const platformIcons = {
+          website: 'bi-globe2',
+          whatsapp: 'bi-whatsapp',
+          email: 'bi-envelope-fill',
+          blog: 'bi-journal-text',
+          instagram: 'bi-instagram',
+          facebook: 'bi-facebook',
+          linkedin: 'bi-linkedin',
+          youtube: 'bi-youtube',
+      };
       const externalLinksData = externalLinks.filter(item => item.published)
-          .map(item => `<a target="_blank" href="${item.url}">${item.platform}</a>` );
-      $('#data_externalLinks').html(externalLinksData.join('<br/>'));
+          .map(item => {
+              const key = (item.platform || '').toLowerCase();
+              const icon = platformIcons[key] || 'bi-link-45deg';
+              return `<a target="_blank" href="${item.url}" class="d-inline-flex align-items-center text-decoration-none link-body-emphasis border rounded-pill px-3 py-1 me-1 mb-2" style="font-size: 0.8rem;">
+                  <i class="bi ${icon} me-1"></i>
+                  <span>${item.platform}</span>
+              </a>`;
+          });
+      $('#data_externalLinks').html(`<div class="d-flex flex-wrap">${externalLinksData.join('')}</div>`);
 
       // picture
       if (data.picture?.length) {
@@ -58,13 +75,13 @@ export default function ProfilePage() {
       // skills
       const skills = data.skills|| [];
       if (!skills.length) $("#skills-wrap").hide();
-      const skillsData = skills.map(item => `<li>${item.text}</li>`);
+      const skillsData = skills.map(item => `<span class="badge rounded-pill text-bg-light border fw-normal me-1 mb-1">${item.text}</span>`);
       $('#data_skills').html(skillsData.join(''));
 
       // traits
       const traits = data.traits|| [];
       if (!traits.length) $("#traits-wrap").hide();
-      const traitsData = traits.map(item => `<li>${item.text}</li>`);
+      const traitsData = traits.map(item => `<span class="badge rounded-pill text-bg-success-subtle border border-success-subtle text-success-emphasis fw-normal me-1 mb-1">${item.text}</span>`);
       $('#data_traits').html(traitsData.join(''));
 
       // left-pane
@@ -150,11 +167,11 @@ export default function ProfilePage() {
           <div id="data_externalLinks" className="bg-body-tertiary rounded mb-2 p-2"></div>
           <div className="bg-body-tertiary rounded mb-2 p-2" id="skills-wrap" style={{ maxHeight: '20rem', overflow: 'auto' }}>
             <h5>Skills</h5>
-            <ul id="data_skills"></ul>
+            <div id="data_skills" className="d-flex flex-wrap"></div>
           </div>
           <div className="bg-body-tertiary rounded mb-2 p-2" id="traits-wrap" style={{ maxHeight: '20rem', overflow: 'auto' }}>
             <h5>Traits</h5>
-            <ul id="data_traits"></ul>
+            <div id="data_traits" className="d-flex flex-wrap"></div>
           </div>
         </div>
 
