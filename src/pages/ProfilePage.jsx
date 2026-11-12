@@ -1,10 +1,11 @@
 import { useParams } from 'react-router-dom';
-import { SEO as profiles } from '../assets/js/constants.js';
+import { SEO as profiles, PROFILE_EXTRAS, withUtm } from '../assets/js/constants.js';
 import { useEffect } from 'react';
 
 export default function ProfilePage() {
   const { slug } = useParams();
   const profile = profiles[slug];
+  const extras = PROFILE_EXTRAS[slug] || {};
 
   if (profile) {
     document.title = profile.title;
@@ -20,7 +21,6 @@ export default function ProfilePage() {
   
   useEffect(() => {
     getData(slug);
-    if (slug === 'core-mind-wellness') loadGoogleReviews();
   }, [])
 
   const noDataCard = `
@@ -58,7 +58,8 @@ export default function ProfilePage() {
           .map(item => {
               const key = (item.platform || '').toLowerCase();
               const icon = platformIcons[key] || 'bi-link-45deg';
-              return `<a target="_blank" href="${item.url}" class="d-inline-flex align-items-center text-decoration-none link-body-emphasis border rounded-pill px-3 py-1 me-1 mb-2" style="font-size: 0.8rem;">
+              const href = (extras.utmPlatforms || []).includes(key) ? withUtm(item.url) : item.url;
+              return `<a target="_blank" rel="noopener" href="${href}" class="d-inline-flex align-items-center text-decoration-none link-body-emphasis border rounded-pill px-3 py-1 me-1 mb-2" style="font-size: 0.8rem;">
                   <i class="bi ${icon} me-1"></i>
                   <span>${item.platform}</span>
               </a>`;
@@ -113,10 +114,15 @@ export default function ProfilePage() {
       const storyData = `<div class="card mb-2" style="width: 100%;">
       <div class="card-body">
           <p class="card-text">${story.text}</p>
-          ${slug === 'core-mind-wellness' ? `
+          ${extras.mapQuery ? `
             <div class="ratio ratio-16x9 mt-2">
-              <iframe src="https://www.google.com/maps?q=Core+Mind+Wellness,+Sector+28,+Gurgaon&amp;output=embed" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Core Mind Wellness location"></iframe>
+              <iframe src="https://www.google.com/maps?q=${encodeURIComponent(extras.mapQuery)}&amp;output=embed" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${extras.mapQuery} location"></iframe>
             </div>` : ''}
+          ${extras.mentalHealthNote ? `
+            <p class="small text-secondary mt-3 mb-0">
+              <i class="bi bi-heart-pulse me-1"></i>
+              In crisis or need someone to talk to right now? Call <a href="tel:14416">Tele-MANAS 14416</a>, India's free, 24&times;7 mental health helpline.
+            </p>` : ''}
       </div>
       </div>`;
       $('#data_story').html(storyData || noDataCard);
@@ -154,99 +160,6 @@ export default function ProfilePage() {
       $('#data_testimonials').html(testimonialsData.join('') || noDataCard);
   }
 
-  // <!-- Live Google reviews (Places API) -->
-  const GOOGLE_MAPS_API_KEY = 'AIzaSyBKaJWfWSw077EKNT3SAHO0oNwKyPHRIQw';
-  const GOOGLE_REVIEWS_PLACE_QUERY = 'Core Mind Wellness, Sector 28, Gurgaon';
-  const GOOGLE_REVIEWS_PLACE_LATLNG = { lat: 28.4697709, lng: 77.0909095 };
-
-  function showReviewsMessage(text) {
-      $('#data_reviews').html(`<div class="card mb-2" style="width: 100%;"><div class="card-body"><p class="card-text">${text}</p></div></div>`);
-  }
-
-  function starIcons(rating) {
-      const full = Math.round(rating || 0);
-      let stars = '';
-      for (let i = 0; i < 5; i++) stars += i < full ? '★' : '☆';
-      return stars;
-  }
-
-  function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str || '';
-      return div.innerHTML;
-  }
-
-  function renderGoogleReviews(place) {
-      const reviews = place && place.reviews;
-      if (!reviews || !reviews.length) {
-          showReviewsMessage('No reviews available right now.');
-          return;
-      }
-      const summary = place.rating
-          ? `<p class="text-secondary mb-3">${place.rating.toFixed(1)} ★ average from ${place.user_ratings_total || reviews.length} Google reviews</p>`
-          : '';
-      const cards = reviews.map((r) => {
-          const photo = r.profile_photo_url;
-          return `<div class="card mb-2" style="width: 100%;"><div class="card-body">
-              <div class="d-flex align-items-center mb-2">
-              ${photo ? `<img src="${photo}" alt="" style="width:40px;height:40px;border-radius:50%;margin-right:10px;">` : ''}
-              <div>
-                  <div><strong>${escapeHtml(r.author_name)}</strong></div>
-                  <div style="color:#f5a623;">${starIcons(r.rating)}</div>
-              </div></div>
-              <p class="card-text">${escapeHtml(r.text)}</p>
-              <small class="text-secondary">${escapeHtml(r.relative_time_description)} &middot; via Google</small>
-          </div></div>`;
-      }).join('');
-      $('#data_reviews').html(summary + cards);
-  }
-
-  function fetchGoogleReviews() {
-      if (!window.google || !google.maps || !google.maps.places) {
-          showReviewsMessage('Unable to load reviews right now.');
-          return;
-      }
-      const service = new google.maps.places.PlacesService(document.createElement('div'));
-      service.findPlaceFromQuery(
-          {
-              query: GOOGLE_REVIEWS_PLACE_QUERY,
-              fields: ['place_id'],
-              locationBias: new google.maps.LatLng(GOOGLE_REVIEWS_PLACE_LATLNG.lat, GOOGLE_REVIEWS_PLACE_LATLNG.lng)
-          },
-          (results, status) => {
-              if (status !== google.maps.places.PlacesServiceStatus.OK || !results || !results.length) {
-                  showReviewsMessage('Unable to load reviews right now.');
-                  return;
-              }
-              service.getDetails(
-                  { placeId: results[0].place_id, fields: ['reviews', 'rating', 'user_ratings_total'] },
-                  (place, detailStatus) => {
-                      if (detailStatus !== google.maps.places.PlacesServiceStatus.OK || !place) {
-                          showReviewsMessage('Unable to load reviews right now.');
-                          return;
-                      }
-                      renderGoogleReviews(place);
-                  }
-              );
-          }
-      );
-  }
-
-  function loadGoogleReviews() {
-      if (window.google?.maps?.places) {
-          fetchGoogleReviews();
-          return;
-      }
-      if (document.getElementById('google-places-script')) return;
-      window.initGoogleReviews = fetchGoogleReviews;
-      const script = document.createElement('script');
-      script.id = 'google-places-script';
-      script.async = true;
-      script.defer = true;
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=initGoogleReviews`;
-      document.body.appendChild(script);
-  }
-
   return (
     <div className="container text-left">
       <div className="row p-2">
@@ -273,6 +186,16 @@ export default function ProfilePage() {
         </div>
 
         <div className="col-sm-8" id="right-pane">
+          {extras.cta && (
+            <a
+              href={withUtm(extras.cta.url, 'cta')}
+              target="_blank"
+              rel="noopener"
+              className="btn btn-success w-100 mb-3"
+            >
+              <i className="bi bi-calendar-heart me-2"></i>{extras.cta.label}
+            </a>
+          )}
           {/* tabs */}
           <ul className="nav nav-pills mb-3" id="pills-tab" role="tablist">
             <li className="nav-item" role="presentation">
@@ -284,49 +207,16 @@ export default function ProfilePage() {
             <li className="nav-item" role="presentation">
               <button className="nav-link" id="data_endorsements-tab" data-bs-toggle="pill" data-bs-target="#data_endorsements" type="button" role="tab" aria-controls="data_endorsements" aria-selected="false">Endorsements</button>
             </li>
-            {slug === 'core-mind-wellness' && (
-              <li className="nav-item" role="presentation">
-                <button className="nav-link" id="data_reviews-tab" data-bs-toggle="pill" data-bs-target="#data_reviews" type="button" role="tab" aria-controls="data_reviews" aria-selected="false">Reviews</button>
-              </li>
-            )}
           </ul>
           {/* content */}
           <div className="tab-content" id="pills-tabContent">
             <div className="tab-pane fade" id="data_story" role="tabpanel" aria-labelledby="data_story-tab" tabIndex="0"></div>
             <div className="tab-pane fade" id="data_testimonials" role="tabpanel" aria-labelledby="data_testimonials-tab" tabIndex="0"></div>
             <div className="tab-pane fade" id="data_endorsements" role="tabpanel" aria-labelledby="data_endorsements-tab" tabIndex="0"></div>
-            {slug === 'core-mind-wellness' && (
-              <div className="tab-pane fade" id="data_reviews" role="tabpanel" aria-labelledby="data_reviews-tab" tabIndex="0"></div>
-            )}
           </div>
         </div>
       </div>
 
-      {slug === 'core-mind-wellness' && (
-        <>
-          <p
-            id="vuxocallbutton"
-            style={{ position: 'fixed', bottom: '10px', right: '10px', cursor: 'pointer' }}
-            onClick={() => {
-              const iframe = document.getElementById('vuxoiframe');
-              if (iframe) {
-                const display = { block: 'none', none: 'block' };
-                iframe.style.display = display[iframe.style.display] || 'block';
-              }
-            }}
-          >
-            <img src="https://i.imgur.com/U2Dz59P.png" alt="vuxo-ai-chat" style={{ width: '40px' }} />
-          </p>
-          <iframe
-            id="vuxoiframe"
-            src="https://vuxo.aiempower.ca/embed/240ba3c2-3de2-47df-81aa-72237f06e1ea?isFullScreen=true"
-            width="100%"
-            height="600"
-            style={{ border: 'none', position: 'fixed', bottom: '10px', right: '50px', width: '200px', height: '80%', display: 'none', borderRadius: '10px', minWidth: '300px' }}
-            title="Core mind wellness"
-          ></iframe>
-        </>
-      )}
     </div>
   );
 }

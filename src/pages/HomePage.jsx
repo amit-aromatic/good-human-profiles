@@ -1,4 +1,5 @@
-import { SEO } from '../assets/js/constants.js';
+import { Link } from 'react-router-dom';
+import { SEO, FEATURED_PROFILES, withUtm } from '../assets/js/constants.js';
 
 export default function HomePage() {
   document.title = SEO.default.title;
@@ -33,6 +34,48 @@ export default function HomePage() {
           A testimonial as coming from a client and an endorsement as coming from someone promoting your services
         </div>
       </div>
+
+      <div className="row m-2 p-2 bg-body-tertiary rounded">
+        <div className="col">
+          <h5 className="mt-1">Why appreciate the people around us?</h5>
+          <p className="mb-2">
+            Most of us carry quiet struggles: pressure at work, worries at home, the feeling of not being enough.
+            A few honest words, like <i>"you made a difference"</i>, can lift someone more than we realise.
+            Feeling seen and valued is good for mental health, and so is taking the time to say thank you.
+            That is why The Good Human exists.
+          </p>
+          <p className="mb-2">
+            Sometimes kindness from friends and family is not enough, and that is okay.
+            Talking to a trained professional is a sign of strength, not weakness. If you or someone you care about
+            is struggling, reach out.
+          </p>
+          <p className="small text-secondary mb-1">
+            In crisis? Call <a href="tel:14416">Tele-MANAS 14416</a>, India's free, 24&times;7 mental health helpline.
+          </p>
+        </div>
+      </div>
+
+      {FEATURED_PROFILES.length > 0 && (
+        <div className="row m-2">
+          <div className="col p-0">
+            <h5 className="px-2 mt-2">Featured</h5>
+            {FEATURED_PROFILES.map((p) => (
+              <div key={p.slug} className="card mb-2">
+                <div className="card-body">
+                  <h6 className="card-title mb-1">{p.name}</h6>
+                  <p className="card-text mb-2">{p.blurb}</p>
+                  <Link to={`/${p.slug}`} className="btn btn-sm btn-outline-primary me-2">View profile</Link>
+                  {p.website && (
+                    <a href={withUtm(p.website, 'home_featured')} target="_blank" rel="noopener" className="btn btn-sm btn-success">
+                      Visit website
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
