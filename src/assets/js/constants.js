@@ -1,12 +1,12 @@
 export const SEO = {
     'meenakshi-malik': {
         title: 'Meenakshi Malik | The Good Human',
-        description: 'Meenakshi Malik profile on The Good Human featuring testimonials, endorsements, skills, and traits.',
+        description: 'Meenakshi Malik, Licensed Clinical Psychologist and Founder of Core Mind Wellness, Gurgaon: depression, anxiety, trauma, OCD, ADHD and couples counselling.',
         keywords: "Meenakshi Malik, The Good Human, testimonials, endorsements, profile page, personal recognition, mental health clinic Gurgaon, therapy and counselling, certified therapists, couples counselling, community appreciation, social proof, professional profile",
     },
     'rishika-vashishtha': {
         title: 'Rishika Vashishtha | The Good Human',
-        description: 'Rishika Vashishtha profile on The Good Human with testimonials, endorsements, skills, and personal recognition details.',
+        description: 'Rishika Vashishtha, Licensed Clinical Psychologist and Founder of Core Mind Wellness, Gurgaon: anxiety, depression, OCD, trauma and LGBTQ affirmative therapy.',
         keywords: "Rishika Vashishtha, The Good Human, testimonials, endorsements, profile page, personal recognition, mental health clinic Gurgaon, therapy and counselling, certified therapists, LGBTQ affirmative therapy, community appreciation, social proof, professional profile",
     },
     'core-mind-wellness': {
