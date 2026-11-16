@@ -82,9 +82,14 @@ export default function Layout() {
       </main>
       <footer className="footer mt-auto py-3 bg-body-tertiary">
         <div className="container text-secondary">
-          <ul className="navbar-nav">
+          <ul className="navbar-nav flex-row flex-wrap gap-3">
             <li className="nav-item">
               <Link className="nav-link" to="/privacy-policy">Privacy Policy</Link>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link" href="https://www.instagram.com/goodhuman.in/" target="_blank" rel="noopener me" aria-label="The Good Human on Instagram (@goodhuman.in)">
+                <i className="bi bi-instagram me-1" aria-hidden="true"></i>@goodhuman.in
+              </a>
             </li>
           </ul>
         </div>

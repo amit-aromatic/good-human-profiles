@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /account
 Disallow: /logout
 
-Sitemap: https://the.goodhuman.in/sitemap.txt
+Sitemap: https://the.goodhuman.in/sitemap.xml
